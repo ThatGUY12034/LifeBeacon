@@ -1,45 +1,297 @@
 {% extends "base.html" %}
 {% block title %}My QR Code — LifeBeacon{% endblock %}
+
+{% block extra_head %}
+<style>
+  .qr-layout {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1.5rem; align-items:start; max-width:960px; margin:0 auto;
+  }
+
+  /* Left: QR card */
+  .qr-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden;
+    box-shadow:0 0 40px var(--red-glow);
+    position:relative;
+  }
+  .qr-card::before {
+    content:''; position:absolute;
+    top:0;left:0;right:0; height:2px;
+    background:linear-gradient(90deg,var(--red),var(--teal-dim),transparent);
+  }
+
+  .qr-card-head {
+    padding:1.35rem 1.5rem;
+    background:var(--bg4); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .qr-head-title {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted);
+  }
+
+  .qr-body {
+    padding:2rem; display:flex;
+    flex-direction:column; align-items:center; gap:1.5rem;
+  }
+
+  /* QR image frame */
+  .qr-frame {
+    position:relative; display:inline-block;
+  }
+  .qr-frame-img {
+    width:220px; height:220px;
+    border-radius:var(--r-md);
+    display:block;
+    image-rendering:crisp-edges;
+  }
+  /* Corner HUD */
+  .qr-frame::before, .qr-frame::after {
+    content:''; position:absolute;
+    width:22px; height:22px;
+    border-color:var(--red); border-style:solid;
+    opacity:0.8;
+  }
+  .qr-frame::before { top:-2px; left:-2px; border-width:3px 0 0 3px; border-radius:2px 0 0 0; }
+  .qr-frame::after  { bottom:-2px; right:-2px; border-width:0 3px 3px 0; border-radius:0 0 2px 0; }
+  .qr-inner-corners::before, .qr-inner-corners::after {
+    content:''; position:absolute;
+    width:22px; height:22px;
+    border-color:var(--red); border-style:solid; opacity:0.8;
+  }
+  .qr-inner-corners::before { top:-2px; right:-2px; border-width:3px 3px 0 0; border-radius:0 2px 0 0; }
+  .qr-inner-corners::after  { bottom:-2px; left:-2px; border-width:0 0 3px 3px; border-radius:0 0 0 2px; }
+
+  /* Scan animation */
+  .qr-scan-line {
+    position:absolute; left:4px; right:4px; height:2px;
+    background:linear-gradient(90deg,transparent,var(--red),transparent);
+    animation:qrScan 3s ease-in-out infinite;
+    border-radius:1px;
+  }
+  @keyframes qrScan {
+    0%  { top:10px;  opacity:0; }
+    10% { opacity:0.8; }
+    90% { opacity:0.8; }
+    100%{ top:210px; opacity:0; }
+  }
+
+  .qr-token-display {
+    background:var(--bg4); border:1px solid var(--border);
+    border-radius:var(--r-sm); padding:0.6rem 1rem;
+    font-family:var(--font-display); font-size:0.62rem;
+    color:var(--text-dim); letter-spacing:0.08em;
+    text-align:center; width:100%; word-break:break-all;
+  }
+
+  /* Download button */
+  .btn-download {
+    display:flex; align-items:center; justify-content:center; gap:0.5rem;
+    width:100%; padding:0.8rem;
+    background:var(--grad-red); color:#fff;
+    border:none; border-radius:var(--r-sm);
+    font-family:var(--font-head); font-size:0.88rem; font-weight:700;
+    letter-spacing:0.09em; text-transform:uppercase;
+    cursor:pointer; transition:all 0.2s;
+    box-shadow:0 4px 18px var(--red-glow);
+    text-decoration:none;
+  }
+  .btn-download:hover { transform:translateY(-1px); box-shadow:0 6px 24px var(--red-glow-lg); }
+
+  /* Right: Info card */
+  .qr-info-card {
+    display:flex; flex-direction:column; gap:1.25rem;
+  }
+
+  .info-section {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden;
+  }
+  .info-sec-head {
+    background:var(--bg4); border-bottom:1px solid var(--border);
+    padding:0.9rem 1.35rem;
+    font-family:var(--font-head); font-size:0.7rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted);
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  .info-sec-body { padding:1.35rem; }
+
+  /* Emergency URL display */
+  .url-display {
+    display:flex; align-items:center; gap:0.5rem;
+    background:var(--bg4); border:1px solid var(--border);
+    border-radius:var(--r-sm); padding:0.7rem 0.9rem;
+  }
+  .url-text {
+    flex:1; font-family:var(--font-display); font-size:0.68rem;
+    color:var(--teal); word-break:break-all; line-height:1.4;
+  }
+  .url-copy-btn {
+    flex-shrink:0; background:var(--bg5); border:1px solid var(--border);
+    border-radius:var(--r-sm); padding:0.35rem 0.65rem;
+    font-family:var(--font-head); font-size:0.68rem; font-weight:700;
+    color:var(--text-muted); cursor:pointer; transition:all 0.18s;
+  }
+  .url-copy-btn:hover { color:var(--text); border-color:var(--border-hover); }
+  .url-copy-btn.copied { color:var(--success); border-color:rgba(0,229,160,0.3); }
+
+  /* How-to steps */
+  .how-steps { display:flex; flex-direction:column; gap:0.85rem; }
+  .how-step-item {
+    display:flex; align-items:flex-start; gap:0.85rem;
+  }
+  .step-num {
+    width:24px; height:24px; flex-shrink:0;
+    background:var(--red-glow); border:1px solid var(--red-border);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:0.6rem; font-weight:700;
+    color:var(--red-light);
+  }
+  .step-text { font-size:0.84rem; color:var(--text-muted); line-height:1.6; }
+  .step-text strong { color:var(--text); }
+
+  /* Warning notice */
+  .notice {
+    display:flex; gap:0.75rem;
+    background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.22);
+    border-radius:var(--r-md); padding:0.9rem 1rem; font-size:0.83rem;
+    color:var(--warning);
+  }
+
+  @media(max-width:768px){
+    .qr-layout { grid-template-columns:1fr; max-width:480px; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-  <div><div class="page-title">My Emergency QR Code</div><div class="page-sub">Scan this to see your emergency medical info</div></div>
-  <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">← Dashboard</a>
-</div>
-<div class="grid-2">
-  <div class="card card-accent" style="text-align:center;">
-    <div class="card-title" style="justify-content:center;"><div class="icon">📱</div> Your QR Code</div>
-    <div style="background:white;border-radius:12px;padding:1.25rem;display:inline-block;margin:0 auto 1.5rem;">
-      <img src="{{ url_for('qr_svg') }}" alt="QR Code" style="width:200px;height:200px;display:block;">
-    </div>
-    <div style="margin-bottom:1rem;">
-      <div class="text-muted text-sm mb-2">Emergency URL:</div>
-      <code style="background:var(--bg3);padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;word-break:break-all;display:block;border:1px solid var(--border);">
-        {{ request.host_url }}emergency/{{ user.qr_token }}
-      </code>
-    </div>
-    <div class="flex gap-1" style="justify-content:center;">
-      <a href="{{ url_for('qr_image') }}" download="lifebeacon-qr.png" class="btn btn-primary">⬇ Download PNG</a>
-      <a href="{{ request.host_url }}emergency/{{ user.qr_token }}" target="_blank" class="btn btn-ghost">👁 Preview</a>
-    </div>
+
+<!-- Header -->
+<div style="margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+  <div>
+    <div style="font-family:var(--font-head);font-size:0.68rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);margin-bottom:0.3rem;">Emergency Access</div>
+    <div style="font-family:var(--font-display);font-size:clamp(1.3rem,2.5vw,1.75rem);font-weight:800;letter-spacing:0.04em;">My QR Code</div>
+    <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.35rem;">Your personal emergency access identifier</div>
   </div>
-  <div class="card">
-    <div class="card-title"><div class="icon">ℹ️</div> What Doctors See</div>
-    <div style="display:flex;flex-direction:column;gap:0.75rem;">
-      {% for icon,label,value in [('🩸','Blood Group',user.blood_group),('⚠️','Allergies',user.allergies),('🏥','Chronic Conditions',user.chronic_conditions),('💊','Medications',user.medications),('📞','Emergency Contact',user.emergency_contact_name)] %}
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;">
-        <span style="font-size:1.2rem;">{{ icon }}</span>
-        <div>
-          <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;">{{ label }}</div>
-          <div style="font-size:0.9rem;margin-top:0.1rem;">{% if value %}{{ value }}{% else %}<span class="text-muted">Not set</span>{% endif %}</div>
-        </div>
-        {% if not value %}<a href="{{ url_for('profile') }}" style="margin-left:auto;font-size:0.78rem;color:var(--red);text-decoration:none;">+ Add</a>{% endif %}
+  <a href="{{ url_for('dashboard') }}" class="btn btn-ghost btn-sm">← Dashboard</a>
+</div>
+
+<div class="qr-layout">
+
+  <!-- QR Card -->
+  <div class="qr-card" id="qr-card">
+    <div class="qr-card-head">
+      <div class="qr-head-title">◈ Emergency QR Code</div>
+      <span class="badge badge-green">Active</span>
+    </div>
+    <div class="qr-body">
+      <div class="qr-frame" id="qr-frame">
+        <div class="qr-inner-corners"></div>
+        <div class="qr-scan-line"></div>
+        <img
+          src="{{ url_for('qr_image') }}"
+          alt="Your LifeBeacon QR code"
+          class="qr-frame-img"
+          id="qr-image"
+        />
       </div>
-      {% endfor %}
-    </div>
-    <div class="divider"></div>
-    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:0.85rem;font-size:0.85rem;color:#34d399;">
-      🔒 Your email and password are <strong>never</strong> shown in the emergency view.
+
+      <div class="qr-token-display" id="qr-token-display">
+        TOKEN: {{ user.qr_token[:24] }}…
+      </div>
+
+      <a
+        href="{{ url_for('qr_image') }}"
+        download="lifebeacon-qr-{{ user.name | lower | replace(' ', '-') }}.png"
+        class="btn-download"
+        id="qr-download-btn"
+      >
+        ⬇ Download QR Code (PNG)
+      </a>
     </div>
   </div>
+
+  <!-- Info Panel -->
+  <div class="qr-info-card">
+
+    <!-- Emergency URL -->
+    <div class="info-section" id="emergency-url-section">
+      <div class="info-sec-head">⬡ Your Emergency URL</div>
+      <div class="info-sec-body">
+        <p style="font-size:0.83rem;color:var(--text-muted);margin-bottom:0.85rem;line-height:1.6;">
+          Scanning your QR code opens this URL — accessible to anyone <strong style="color:var(--text);">without a login</strong>:
+        </p>
+        <div class="url-display">
+          <div class="url-text" id="emergency-url-text">
+            {{ request.host_url }}emergency/{{ user.qr_token }}
+          </div>
+          <button class="url-copy-btn" id="copy-url-btn"
+            onclick="copyURL('{{ request.host_url }}emergency/{{ user.qr_token }}')">
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Use -->
+    <div class="info-section">
+      <div class="info-sec-head">📋 How to Use Your QR Code</div>
+      <div class="info-sec-body">
+        <div class="how-steps">
+          <div class="how-step-item">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>Download</strong> the QR code PNG using the button on the left.</div>
+          </div>
+          <div class="how-step-item">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>Print it out</strong> and keep it in your wallet, on your keychain, or on your phone's lock screen.</div>
+          </div>
+          <div class="how-step-item">
+            <div class="step-num">3</div>
+            <div class="step-text">In an emergency, responders <strong>scan the QR</strong> to instantly see your blood group, allergies, and emergency contact.</div>
+          </div>
+          <div class="how-step-item">
+            <div class="step-num">4</div>
+            <div class="step-text"><strong>Update your profile</strong> anytime — the QR code always links to your latest information.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notice -->
+    <div class="notice" id="qr-notice">
+      <span>⚠</span>
+      <div>
+        Keep your profile information <strong>complete and current</strong>. 
+        Outdated allergies or medications on your emergency page could affect your care.
+        <a href="{{ url_for('profile') }}" style="color:var(--warning);text-decoration:underline;margin-left:0.3rem;">Update Profile →</a>
+      </div>
+    </div>
+
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  setNavUser('{{ user.name | e }}', '{{ user.role | upper }}');
+
+  function copyURL(url) {
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('copy-url-btn');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2500);
+    }).catch(() => {
+      // fallback
+      const el = document.createElement('textarea');
+      el.value = url;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    });
+  }
+</script>
 {% endblock %}

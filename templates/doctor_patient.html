@@ -1,59 +1,474 @@
 {% extends "base.html" %}
-{% block title %}Patient: {{ patient.name }} — LifeBeacon{% endblock %}
+{% block title %}{{ patient.name }} — Doctor View — LifeBeacon{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Back bar */
+  .back-bar {
+    display:flex; align-items:center; gap:0.75rem;
+    margin-bottom:1.75rem; flex-wrap:wrap;
+  }
+  .back-btn {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    padding:0.42rem 0.9rem;
+    background:var(--bg4); border:1px solid var(--border);
+    border-radius:var(--r-sm); font-family:var(--font-head);
+    font-size:0.78rem; font-weight:700; letter-spacing:0.07em;
+    text-transform:uppercase; color:var(--text-muted);
+    transition:all 0.18s; text-decoration:none;
+  }
+  .back-btn:hover { color:var(--text); border-color:var(--border-hover); }
+  .breadcrumb {
+    font-family:var(--font-head); font-size:0.72rem;
+    color:var(--text-dim); letter-spacing:0.06em;
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  .breadcrumb span { color:var(--teal-dim); }
+
+  /* ── PATIENT HEADER ──────────────────────────────────────────────── */
+  .patient-banner {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden; margin-bottom:1.75rem;
+    position:relative;
+  }
+  .patient-banner::before {
+    content:''; display:block; height:3px;
+    background:linear-gradient(90deg,var(--teal-dim),var(--red),transparent);
+  }
+  .pb-inner {
+    padding:1.75rem; display:flex; align-items:flex-start;
+    gap:1.5rem; flex-wrap:wrap;
+  }
+  .pb-avatar {
+    width:72px; height:72px; flex-shrink:0; border-radius:var(--r-md);
+    background:linear-gradient(135deg,var(--teal-dim),rgba(116,214,219,0.5));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:1.4rem; font-weight:800;
+    color:var(--bg);
+  }
+  .pb-info { flex:1; min-width:200px; }
+  .pb-label {
+    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
+    letter-spacing:0.18em; text-transform:uppercase; color:var(--teal);
+    margin-bottom:0.25rem;
+  }
+  .pb-name {
+    font-family:var(--font-display);
+    font-size:clamp(1.3rem,3vw,1.9rem);
+    font-weight:800; letter-spacing:0.03em; margin-bottom:0.4rem;
+  }
+  .pb-email { font-size:0.84rem; color:var(--text-muted); margin-bottom:0.65rem; }
+  .pb-tags { display:flex; flex-wrap:wrap; gap:0.5rem; }
+
+  .pb-meta {
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:1px; background:var(--border);
+    border-top:1px solid var(--border);
+  }
+  .pb-meta-item {
+    background:var(--bg3); padding:0.9rem 1.35rem;
+  }
+  .pb-meta-label {
+    font-family:var(--font-head); font-size:0.62rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim);
+    margin-bottom:0.25rem;
+  }
+  .pb-meta-val {
+    font-family:var(--font-head); font-size:0.92rem; font-weight:700;
+  }
+
+  /* ── EMERGENCY CONTACT CARD ─────────────────────────────────────── */
+  .contact-card {
+    background:var(--bg2); border:1px solid rgba(245,158,11,0.3);
+    border-radius:var(--r-lg); overflow:hidden; margin-bottom:1.75rem;
+    box-shadow:0 0 20px rgba(245,158,11,0.08);
+  }
+  .contact-card::before { content:''; display:block; height:2px; background:linear-gradient(90deg,var(--warning),transparent 60%); }
+  .contact-head {
+    padding:0.9rem 1.35rem; background:var(--bg4); border-bottom:1px solid var(--border);
+    font-family:var(--font-head); font-size:0.7rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--warning);
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  .contact-body {
+    padding:1.35rem;
+    display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;
+  }
+  .contact-detail { flex:1; }
+  .contact-relation {
+    font-family:var(--font-head); font-size:0.66rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim);
+    margin-bottom:0.2rem;
+  }
+  .contact-name {
+    font-family:var(--font-head); font-size:1rem;
+    font-weight:700; margin-bottom:0.25rem;
+  }
+  .contact-phone {
+    font-family:var(--font-display); font-size:1.4rem;
+    font-weight:800; color:var(--success);
+  }
+  .contact-call {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    padding:0.55rem 1.1rem;
+    background:linear-gradient(135deg,#00e5a0,#00b37a); color:#000;
+    border:none; border-radius:var(--r-sm); font-family:var(--font-head);
+    font-size:0.82rem; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; cursor:pointer; transition:all 0.2s;
+    text-decoration:none;
+    box-shadow:0 4px 14px rgba(0,229,160,0.25);
+  }
+  .contact-call:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,229,160,0.35); }
+
+  /* ── CHARTS ROW ──────────────────────────────────────────────────── */
+  .charts-row {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1.25rem; margin-bottom:1.75rem;
+  }
+  .chart-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1.5rem;
+    position:relative; overflow:hidden;
+  }
+  .chart-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; }
+  .cc-bp::before    { background:linear-gradient(90deg,var(--red),transparent 60%); }
+  .cc-sugar::before { background:linear-gradient(90deg,var(--success),transparent 60%); }
+  .chart-title {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.13em; text-transform:uppercase; color:var(--text-muted);
+    margin-bottom:0.2rem;
+  }
+  .chart-sub { font-size:0.76rem; color:var(--text-dim); margin-bottom:1.1rem; }
+  .chart-wrap { height:180px; position:relative; }
+
+  /* ── MEDICAL INFO GRID ───────────────────────────────────────────── */
+  .med-info-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1.25rem; margin-bottom:1.75rem;
+  }
+  .info-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden;
+  }
+  .ic-head {
+    background:var(--bg4); border-bottom:1px solid var(--border);
+    padding:0.85rem 1.35rem;
+    font-family:var(--font-head); font-size:0.68rem; font-weight:700;
+    letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted);
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  .ic-body { padding:1.1rem; }
+  .ic-na { font-size:0.82rem; color:var(--text-dim); font-style:italic; }
+
+  .tag-cloud { display:flex; flex-wrap:wrap; gap:0.45rem; }
+  .tag {
+    padding:0.28rem 0.65rem; border-radius:3px;
+    font-family:var(--font-head); font-size:0.78rem;
+    font-weight:700; letter-spacing:0.04em;
+  }
+  .tag-allergy   { background:rgba(232,23,58,0.12); color:var(--red-light); border:1px solid rgba(232,23,58,0.25); }
+  .tag-condition { background:rgba(245,158,11,0.1); color:var(--warning); border:1px solid rgba(245,158,11,0.22); }
+  .tag-med       { background:rgba(116,214,219,0.08); color:var(--teal); border:1px solid rgba(116,214,219,0.2); }
+
+  /* ── READINGS TABLES ─────────────────────────────────────────────── */
+  .tables-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;
+  }
+  .table-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden;
+  }
+  .tc-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0.9rem 1.35rem; background:var(--bg4);
+    border-bottom:1px solid var(--border);
+  }
+  .tc-title {
+    font-family:var(--font-head); font-size:0.7rem; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted);
+  }
+  table.rt { width:100%; border-collapse:collapse; font-size:0.83rem; }
+  table.rt th {
+    padding:0.5rem 1rem; text-align:left;
+    font-family:var(--font-head); font-size:0.63rem; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-dim); background:var(--bg3);
+    border-bottom:1px solid var(--border);
+  }
+  table.rt td {
+    padding:0.62rem 1rem;
+    border-bottom:1px solid rgba(255,255,255,0.025); color:var(--text);
+  }
+  table.rt tbody tr:last-child td { border-bottom:none; }
+  table.rt tbody tr:hover td { background:rgba(255,255,255,0.02); }
+  .chip {
+    display:inline-block; padding:0.14rem 0.5rem;
+    border-radius:3px; font-family:var(--font-head);
+    font-size:0.74rem; font-weight:700;
+  }
+  .chip-bp    { background:rgba(232,23,58,0.12); color:var(--red-light); }
+  .chip-sugar { background:rgba(0,229,160,0.1); color:var(--success); }
+
+  .empty-state {
+    padding:2rem; text-align:center;
+    color:var(--text-dim); font-size:0.83rem;
+  }
+
+  @media(max-width:900px){
+    .charts-row, .tables-row, .med-info-grid { grid-template-columns:1fr; }
+    .pb-meta { grid-template-columns:1fr 1fr; }
+  }
+  @media(max-width:640px){
+    .pb-meta { grid-template-columns:1fr; }
+    .pb-inner { gap:1rem; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-  <div><div class="page-title">{{ patient.name }}</div><div class="page-sub">{{ patient.email }} · Dr. {{ doctor.name }}</div></div>
-  <a href="{{ url_for('doctor_panel') }}" class="btn btn-ghost">← Back</a>
-</div>
-<div class="grid-4 mb-3">
-  <div class="stat-card" style="border-color:rgba(232,23,58,0.3);"><div class="stat-label">Blood Group</div><div class="stat-value text-red">{{ patient.blood_group or '—' }}</div></div>
-  <div class="stat-card"><div class="stat-label">Date of Birth</div><div class="stat-value" style="font-size:1.1rem;">{{ patient.dob or '—' }}</div></div>
-  <div class="stat-card"><div class="stat-label">BP Readings</div><div class="stat-value">{{ readings_bp|length }}</div></div>
-  <div class="stat-card"><div class="stat-label">Sugar Readings</div><div class="stat-value">{{ readings_sugar|length }}</div></div>
-</div>
-<div class="grid-2 mb-3">
-  <div class="card">
-    <div class="card-title"><div class="icon">⚠️</div> Allergies</div>
-    {% if patient.allergies %}<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:1rem;color:#fbbf24;">{{ patient.allergies }}</div>
-    {% else %}<p class="text-muted">None on record</p>{% endif %}
-    <div style="margin-top:1.25rem;"><div class="card-title" style="margin-bottom:0.75rem;"><div class="icon">🏥</div> Chronic Conditions</div>
-    {% if patient.chronic_conditions %}<p>{{ patient.chronic_conditions }}</p>{% else %}<p class="text-muted">None on record</p>{% endif %}</div>
-    <div class="divider"></div>
-    <div class="card-title" style="margin-bottom:0.75rem;"><div class="icon">💊</div> Medications</div>
-    {% if patient.medications %}<p>{{ patient.medications }}</p>{% else %}<p class="text-muted">None on record</p>{% endif %}
+
+<!-- Back / Breadcrumb -->
+<div class="back-bar">
+  <a href="{{ url_for('doctor_panel') }}" class="back-btn" id="back-to-panel">← Doctor Panel</a>
+  <div class="breadcrumb">
+    <span>Doctor Panel</span> / {{ patient.name }}
   </div>
-  <div class="card">
-    <div class="card-title"><div class="icon">📞</div> Emergency Contact</div>
-    {% if patient.emergency_contact_name %}
-    <div style="background:rgba(232,23,58,0.08);border:1px solid rgba(232,23,58,0.25);border-radius:12px;padding:1.25rem;">
-      <div style="font-size:1.2rem;font-weight:700;margin-bottom:0.2rem;">{{ patient.emergency_contact_name }}</div>
-      {% if patient.emergency_contact_relation %}<div class="text-muted text-sm mb-2">{{ patient.emergency_contact_relation }}</div>{% endif %}
-      {% if patient.emergency_contact_phone %}
-      <div style="font-size:1.5rem;font-weight:700;color:var(--red);">{{ patient.emergency_contact_phone }}</div>
-      <a href="tel:{{ patient.emergency_contact_phone }}" class="btn btn-primary mt-2">📱 Call Contact</a>
+</div>
+
+<!-- Patient Banner -->
+<div class="patient-banner" id="patient-banner">
+  <div class="pb-inner">
+    <div class="pb-avatar">
+      {{ patient.name[:2].upper() if patient.name else '??' }}
+    </div>
+    <div class="pb-info">
+      <div class="pb-label">Patient Record · ID #{{ patient.id }}</div>
+      <div class="pb-name">{{ patient.name }}</div>
+      <div class="pb-email">{{ patient.email }}</div>
+      <div class="pb-tags">
+        {% if patient.blood_group %}
+        <span class="badge badge-red">🩸 {{ patient.blood_group }}</span>
+        {% endif %}
+        {% if patient.dob %}
+        <span class="badge badge-dim">DOB: {{ patient.dob }}</span>
+        {% endif %}
+        <span class="badge badge-teal">Patient</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pb-meta">
+    <div class="pb-meta-item">
+      <div class="pb-meta-label">Blood Group</div>
+      <div class="pb-meta-val" style="color:var(--red-light);">{{ patient.blood_group or '—' }}</div>
+    </div>
+    <div class="pb-meta-item">
+      <div class="pb-meta-label">Total Readings</div>
+      <div class="pb-meta-val" style="color:var(--teal);">{{ (readings_bp|length) + (readings_sugar|length) }}</div>
+    </div>
+    <div class="pb-meta-item">
+      <div class="pb-meta-label">Allergies</div>
+      <div class="pb-meta-val" style="color:var(--warning);">
+        {{ patient.allergies.split(',') | length if patient.allergies else '0' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Emergency Contact -->
+{% if patient.emergency_contact_phone %}
+<div class="contact-card" id="emergency-contact-card">
+  <div class="contact-head">📞 Emergency Contact</div>
+  <div class="contact-body">
+    <div class="contact-detail">
+      <div class="contact-relation">{{ patient.emergency_contact_relation or 'Contact' }}</div>
+      <div class="contact-name">{{ patient.emergency_contact_name or '—' }}</div>
+      <div class="contact-phone">{{ patient.emergency_contact_phone }}</div>
+    </div>
+    <a href="tel:{{ patient.emergency_contact_phone }}" class="contact-call" id="call-btn">
+      📞 Call Now
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Charts -->
+<div class="charts-row">
+  <div class="chart-card cc-bp">
+    <div class="chart-title">Blood Pressure Trend</div>
+    <div class="chart-sub">{{ readings_bp|length }} readings</div>
+    <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
+  </div>
+  <div class="chart-card cc-sugar">
+    <div class="chart-title">Blood Sugar Trend</div>
+    <div class="chart-sub">{{ readings_sugar|length }} readings</div>
+    <div class="chart-wrap"><canvas id="sugarChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Medical Info -->
+<div class="med-info-grid" id="medical-info-grid">
+  <div class="info-card">
+    <div class="ic-head">⚠ Allergies</div>
+    <div class="ic-body">
+      {% if patient.allergies %}
+      <div class="tag-cloud">
+        {% for a in patient.allergies.split(',') %}{% if a.strip() %}
+        <span class="tag tag-allergy">{{ a.strip() }}</span>
+        {% endif %}{% endfor %}
+      </div>
+      {% else %}
+      <span class="ic-na">None on record</span>
       {% endif %}
     </div>
-    {% else %}<p class="text-muted">No emergency contact on file.</p>{% endif %}
+  </div>
+
+  <div class="info-card">
+    <div class="ic-head">🩺 Chronic Conditions</div>
+    <div class="ic-body">
+      {% if patient.chronic_conditions %}
+      <div class="tag-cloud">
+        {% for c in patient.chronic_conditions.split(',') %}{% if c.strip() %}
+        <span class="tag tag-condition">{{ c.strip() }}</span>
+        {% endif %}{% endfor %}
+      </div>
+      {% else %}
+      <span class="ic-na">None on record</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="info-card" style="grid-column:1/-1;">
+    <div class="ic-head">💊 Current Medications</div>
+    <div class="ic-body">
+      {% if patient.medications %}
+      <div class="tag-cloud">
+        {% for m in patient.medications.split(',') %}{% if m.strip() %}
+        <span class="tag tag-med">{{ m.strip() }}</span>
+        {% endif %}{% endfor %}
+      </div>
+      {% else %}
+      <span class="ic-na">None on record</span>
+      {% endif %}
+    </div>
   </div>
 </div>
-<div class="grid-2">
-  <div class="card">
-    <div class="card-title"><div class="icon">🩸</div> Blood Pressure History</div>
-    <canvas id="bpChart" height="200"></canvas>
-    {% if not readings_bp %}<p class="text-muted text-sm" style="text-align:center;padding:1rem;">No readings.</p>{% endif %}
+
+<!-- Tables -->
+<div class="tables-row">
+  <div class="table-card" id="bp-table">
+    <div class="tc-head">
+      <div class="tc-title">💓 BP Readings</div>
+      <span class="badge badge-red">{{ readings_bp|length }}</span>
+    </div>
+    {% if readings_bp %}
+    <table class="rt">
+      <thead><tr><th>Sys</th><th>Dia</th><th>Date</th><th>Notes</th></tr></thead>
+      <tbody>
+        {% for r in readings_bp[:10] %}
+        <tr>
+          <td><span class="chip chip-bp">{{ r.value1 | int }}</span></td>
+          <td><span class="chip chip-bp">{{ r.value2 | int }}</span></td>
+          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
+          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.notes or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No BP readings on record</div>
+    {% endif %}
   </div>
-  <div class="card">
-    <div class="card-title"><div class="icon">🍬</div> Blood Sugar History</div>
-    <canvas id="sugarChart" height="200"></canvas>
-    {% if not readings_sugar %}<p class="text-muted text-sm" style="text-align:center;padding:1rem;">No readings.</p>{% endif %}
+
+  <div class="table-card" id="sugar-table">
+    <div class="tc-head">
+      <div class="tc-title">🩸 Sugar Readings</div>
+      <span class="badge badge-green">{{ readings_sugar|length }}</span>
+    </div>
+    {% if readings_sugar %}
+    <table class="rt">
+      <thead><tr><th>mg/dL</th><th>Date</th><th>Notes</th></tr></thead>
+      <tbody>
+        {% for r in readings_sugar[:10] %}
+        <tr>
+          <td><span class="chip chip-sugar">{{ r.value1 | int }}</span></td>
+          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
+          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.notes or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No sugar readings on record</div>
+    {% endif %}
   </div>
 </div>
+
+<script type="application/json" id="bp-data">{{ readings_bp | tojson }}</script>
+<script type="application/json" id="sugar-data">{{ readings_sugar | tojson }}</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const bpData={{ readings_bp|map(attribute='value1')|list|tojson|safe }};
-const bpData2={{ readings_bp|map(attribute='value2')|list|tojson|safe }};
-const sugarData={{ readings_sugar|map(attribute='value1')|list|tojson|safe }};
-const opts={responsive:true,plugins:{legend:{labels:{color:'#9ca3af'}}},scales:{x:{ticks:{color:'#6b7280',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#6b7280'},grid:{color:'rgba(255,255,255,0.05)'}}}};
-if(bpData.length)new Chart(document.getElementById('bpChart'),{type:'line',data:{labels:bpData.map((_,i)=>'R'+(i+1)),datasets:[{label:'Systolic',data:bpData,borderColor:'#e8173a',tension:0.4,pointRadius:3},{label:'Diastolic',data:bpData2,borderColor:'#3b82f6',tension:0.4,pointRadius:3}]},options:opts});
-if(sugarData.length)new Chart(document.getElementById('sugarChart'),{type:'line',data:{labels:sugarData.map((_,i)=>'R'+(i+1)),datasets:[{label:'Blood Sugar',data:sugarData,borderColor:'#10b981',tension:0.4,pointRadius:3}]},options:opts});
+  setNavUser('{{ doctor.name | e }}', '{{ doctor.role | upper }}');
+
+  const chartOpts = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1d1f28', borderColor:'rgba(93,63,62,0.4)',
+        borderWidth:1, titleColor:'#e2e1ee', bodyColor:'#9ca3af',
+        padding:10, cornerRadius:4,
+      }
+    },
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.03)',drawBorder:false},ticks:{color:'#5a6070',font:{size:10}}},
+      y:{grid:{color:'rgba(255,255,255,0.03)',drawBorder:false},ticks:{color:'#5a6070',font:{size:10}}}
+    }
+  };
+
+  const bpReadings = JSON.parse(document.getElementById('bp-data').textContent);
+  const bpLabels   = [...bpReadings].reverse().map(r => {
+    const d = new Date(r.timestamp);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short',day:'numeric'});
+  });
+  const bpSys = [...bpReadings].reverse().map(r => r.value1);
+  const bpDia = [...bpReadings].reverse().map(r => r.value2);
+
+  const bpCtx = document.getElementById('bpChart').getContext('2d');
+  const bpG   = bpCtx.createLinearGradient(0,0,0,180);
+  bpG.addColorStop(0,'rgba(232,23,58,0.2)'); bpG.addColorStop(1,'rgba(232,23,58,0)');
+  new Chart(bpCtx, {
+    type:'line',
+    data:{
+      labels:bpLabels.length?bpLabels:['No data'],
+      datasets:[
+        {label:'Systolic', data:bpSys.length?bpSys:[0], borderColor:'#e8173a', backgroundColor:bpG, fill:true, tension:0.4, borderWidth:2, pointBackgroundColor:'#e8173a', pointRadius:3, pointHoverRadius:5},
+        {label:'Diastolic',data:bpDia.length?bpDia:[0], borderColor:'rgba(232,23,58,0.4)',backgroundColor:'transparent',fill:false,tension:0.4,borderWidth:1.5,borderDash:[4,3],pointRadius:2}
+      ]
+    },
+    options:{...chartOpts}
+  });
+
+  const sgReadings = JSON.parse(document.getElementById('sugar-data').textContent);
+  const sgLabels   = [...sgReadings].reverse().map(r => {
+    const d = new Date(r.timestamp);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short',day:'numeric'});
+  });
+  const sgVals = [...sgReadings].reverse().map(r => r.value1);
+
+  const sgCtx = document.getElementById('sugarChart').getContext('2d');
+  const sgG   = sgCtx.createLinearGradient(0,0,0,180);
+  sgG.addColorStop(0,'rgba(0,229,160,0.18)'); sgG.addColorStop(1,'rgba(0,229,160,0)');
+  new Chart(sgCtx, {
+    type:'line',
+    data:{
+      labels:sgLabels.length?sgLabels:['No data'],
+      datasets:[{label:'Sugar',data:sgVals.length?sgVals:[0],borderColor:'#00e5a0',backgroundColor:sgG,fill:true,tension:0.4,borderWidth:2,pointBackgroundColor:'#00e5a0',pointRadius:3,pointHoverRadius:5}]
+    },
+    options:{...chartOpts}
+  });
 </script>
 {% endblock %}

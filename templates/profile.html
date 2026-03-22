@@ -1,42 +1,382 @@
 {% extends "base.html" %}
 {% block title %}Medical Profile — LifeBeacon{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Page header */
+  .page-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    flex-wrap:wrap; gap:1rem; margin-bottom:2rem; padding-bottom:1.5rem;
+    border-bottom:1px solid var(--border);
+  }
+  .page-eyebrow {
+    font-family:var(--font-head); font-size:0.68rem; font-weight:700;
+    letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--red); margin-bottom:0.3rem;
+  }
+  .page-title {
+    font-family:var(--font-display); font-size:clamp(1.3rem,2.5vw,1.8rem);
+    font-weight:800; letter-spacing:0.04em;
+  }
+  .page-desc { font-size:0.85rem; color:var(--text-muted); margin-top:0.35rem; }
+
+  /* Profile layout */
+  .profile-layout {
+    display:grid; grid-template-columns:280px 1fr; gap:1.5rem;
+    align-items:start;
+  }
+
+  /* Identity card (left sidebar) */
+  .identity-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden; position:sticky; top:80px;
+  }
+  .id-stripe {
+    height:3px;
+    background:linear-gradient(90deg,var(--red),var(--red-dim),transparent);
+  }
+  .id-body { padding:1.75rem 1.5rem; text-align:center; }
+  .id-avatar {
+    width:72px; height:72px; margin:0 auto 1rem;
+    background:var(--grad-red); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:1.5rem; font-weight:800;
+    color:#fff; box-shadow:0 0 24px var(--red-glow-lg);
+    position:relative;
+  }
+  .id-avatar::after {
+    content:''; position:absolute; inset:-3px;
+    border-radius:50%; border:1px solid var(--red-border);
+    animation:avatarPulse 3s ease-in-out infinite;
+  }
+  @keyframes avatarPulse {
+    0%,100%{box-shadow:0 0 0 0 var(--red-glow);}
+    50%{box-shadow:0 0 0 6px transparent;}
+  }
+  .id-name {
+    font-family:var(--font-display); font-size:1rem;
+    font-weight:700; letter-spacing:0.04em; margin-bottom:0.2rem;
+  }
+  .id-email { font-size:0.8rem; color:var(--text-muted); word-break:break-all; }
+  .id-role {
+    display:inline-block; margin-top:0.65rem;
+    padding:0.22rem 0.65rem;
+    background:var(--red-glow); border:1px solid var(--red-border);
+    border-radius:var(--r-xs);
+    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--red-light);
+  }
+
+  .id-stats {
+    display:grid; grid-template-columns:1fr 1fr; gap:0;
+    border-top:1px solid var(--border); margin-top:1.25rem;
+  }
+  .id-stat {
+    padding:0.9rem 0.75rem; text-align:center;
+    border-right:1px solid var(--border);
+  }
+  .id-stat:nth-child(even) { border-right:none; }
+  .id-stat-num {
+    font-family:var(--font-display); font-size:1.2rem; font-weight:800;
+    color:var(--red-light); line-height:1;
+  }
+  .id-stat-label {
+    font-family:var(--font-head); font-size:0.62rem; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim);
+    margin-top:0.2rem;
+  }
+
+  .id-blood {
+    margin:1rem 1.5rem;
+    background:var(--bg4); border:1px solid var(--red-border);
+    border-radius:var(--r-md); padding:0.75rem;
+    text-align:center;
+  }
+  .id-blood-label {
+    font-family:var(--font-head); font-size:0.62rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim);
+  }
+  .id-blood-val {
+    font-family:var(--font-display); font-size:2rem; font-weight:900;
+    color:var(--red-light); line-height:1.1;
+  }
+
+  /* Form sections */
+  .profile-form {}
+  .form-section {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden; margin-bottom:1.25rem;
+  }
+  .form-section::before {
+    content:''; display:block; height:2px;
+  }
+  .fsec-medical::before  { background:linear-gradient(90deg,var(--red),transparent 60%); }
+  .fsec-contact::before  { background:linear-gradient(90deg,var(--warning),transparent 60%); }
+  .fsec-identity::before { background:linear-gradient(90deg,var(--teal),transparent 60%); }
+
+  .fsec-head {
+    display:flex; align-items:center; gap:0.75rem;
+    padding:1rem 1.35rem;
+    background:var(--bg4); border-bottom:1px solid var(--border);
+  }
+  .fsec-icon {
+    width:32px; height:32px; border-radius:var(--r-sm);
+    display:flex; align-items:center; justify-content:center; font-size:0.95rem;
+  }
+  .fsec-title {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted);
+  }
+  .fsec-sub { font-size:0.72rem; color:var(--text-dim); margin-top:0.1rem; }
+
+  .fsec-body { padding:1.35rem; }
+
+  .field-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .field-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+
+  .form-field { margin-bottom:0; }
+  .form-label {
+    display:block;
+    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
+    letter-spacing:0.13em; text-transform:uppercase;
+    color:var(--text-dim); margin-bottom:0.4rem; transition:color 0.18s;
+  }
+  .form-field:focus-within .form-label { color:var(--red-light); }
+
+  .form-input, .form-select, .form-textarea {
+    width:100%; background:var(--bg3);
+    border:1px solid var(--border); border-bottom:2px solid var(--border);
+    border-radius:var(--r-sm); padding:0.68rem 0.9rem;
+    color:var(--text); font-family:var(--font-body); font-size:0.88rem;
+    outline:none; transition:all 0.18s; -webkit-appearance:none;
+  }
+  .form-input::placeholder, .form-textarea::placeholder { color:var(--text-ghost); }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    background:var(--bg4); border-color:transparent;
+    border-bottom-color:var(--red);
+    box-shadow:0 0 0 1px rgba(232,23,58,0.08);
+  }
+  .form-select {
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 0.85rem center;
+    padding-right:2rem; cursor:pointer;
+  }
+  .form-select option { background:var(--bg4); }
+  .form-textarea { resize:vertical; min-height:80px; }
+
+  .form-hint {
+    font-size:0.72rem; color:var(--text-dim); margin-top:0.3rem;
+  }
+
+  /* Save bar */
+  .save-bar {
+    position:sticky; bottom:1.5rem; z-index:10;
+    background:rgba(25,27,36,0.9); backdrop-filter:blur(12px);
+    border:1px solid var(--border); border-radius:var(--r-lg);
+    padding:1rem 1.35rem;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:1rem; flex-wrap:wrap;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  }
+  .save-bar-msg {
+    font-size:0.82rem; color:var(--text-muted);
+  }
+  .save-bar-msg strong { color:var(--warning); }
+  .save-bar-btns { display:flex; gap:0.75rem; }
+
+  .btn-save {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    padding:0.65rem 1.4rem;
+    background:var(--grad-red); color:#fff;
+    border:none; border-radius:var(--r-sm);
+    font-family:var(--font-head); font-size:0.85rem; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase;
+    cursor:pointer; transition:all 0.2s;
+    box-shadow:0 4px 16px var(--red-glow);
+  }
+  .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 22px var(--red-glow-lg); }
+  .btn-cancel {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    padding:0.65rem 1.1rem;
+    background:var(--bg5); color:var(--text-muted);
+    border:1px solid var(--border); border-radius:var(--r-sm);
+    font-family:var(--font-head); font-size:0.85rem; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase;
+    cursor:pointer; transition:all 0.18s; text-decoration:none;
+  }
+  .btn-cancel:hover { color:var(--text); border-color:var(--border-hover); }
+
+  @media(max-width:900px){ .profile-layout { grid-template-columns:1fr; } .identity-card { position:static; } }
+  @media(max-width:640px){ .field-grid-2, .field-grid-3 { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
 {% block content %}
+
+<!-- Page Header -->
 <div class="page-header">
-  <div><div class="page-title">Medical Profile</div><div class="page-sub">This info appears in your emergency QR view</div></div>
-  <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">← Back</a>
+  <div>
+    <div class="page-eyebrow">Personnel Record</div>
+    <div class="page-title">Medical Profile</div>
+    <div class="page-desc">Your emergency medical information — keep it current and complete.</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-ghost btn-sm">← Dashboard</a>
+    <a href="{{ url_for('qr_page') }}" class="btn btn-primary btn-sm">▣ View QR</a>
+  </div>
 </div>
-<form method="POST">
-  <div class="grid-2 mb-3">
-    <div class="card">
-      <div class="card-title"><div class="icon">👤</div> Personal Info</div>
-      <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" name="dob" class="form-control" value="{{ user.dob or '' }}"></div>
-      <div class="form-group"><label class="form-label">Blood Group</label>
-        <select name="blood_group" class="form-control">
-          <option value="">Select Blood Group</option>
-          {% for bg in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}
-          <option value="{{ bg }}" {% if user.blood_group == bg %}selected{% endif %}>{{ bg }}</option>
-          {% endfor %}
-        </select>
+
+<div class="profile-layout">
+
+  <!-- Identity Sidebar -->
+  <div class="identity-card">
+    <div class="id-stripe"></div>
+    <div class="id-body">
+      <div class="id-avatar" id="profile-avatar">
+        {{ user.name[:2].upper() if user.name else '??' }}
+      </div>
+      <div class="id-name">{{ user.name }}</div>
+      <div class="id-email">{{ user.email }}</div>
+      <div class="id-role">{{ user.role | upper }}</div>
+    </div>
+
+    {% if user.blood_group %}
+    <div class="id-blood">
+      <div class="id-blood-label">Blood Group</div>
+      <div class="id-blood-val">{{ user.blood_group }}</div>
+    </div>
+    {% endif %}
+
+    <div class="id-stats">
+      <div class="id-stat">
+        <div class="id-stat-num">{{ user.allergies.split(',') | length if user.allergies else 0 }}</div>
+        <div class="id-stat-label">Allergies</div>
+      </div>
+      <div class="id-stat">
+        <div class="id-stat-num">{{ user.medications.split(',') | length if user.medications else 0 }}</div>
+        <div class="id-stat-label">Medications</div>
+      </div>
+      <div class="id-stat">
+        <div class="id-stat-num">{{ 1 if user.emergency_contact_phone else 0 }}</div>
+        <div class="id-stat-label">Contacts</div>
+      </div>
+      <div class="id-stat">
+        <div class="id-stat-num">{{ user.chronic_conditions.split(',') | length if user.chronic_conditions else 0 }}</div>
+        <div class="id-stat-label">Conditions</div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title"><div class="icon">🚨</div> Emergency Contact</div>
-      <div class="form-group"><label class="form-label">Contact Name</label><input type="text" name="emergency_contact_name" class="form-control" value="{{ user.emergency_contact_name or '' }}" placeholder="Jane Doe"></div>
-      <div class="form-group"><label class="form-label">Phone Number</label><input type="tel" name="emergency_contact_phone" class="form-control" value="{{ user.emergency_contact_phone or '' }}" placeholder="+91 98765 43210"></div>
-      <div class="form-group"><label class="form-label">Relationship</label><input type="text" name="emergency_contact_relation" class="form-control" value="{{ user.emergency_contact_relation or '' }}" placeholder="Spouse / Parent"></div>
+  </div>
+
+  <!-- Main Form -->
+  <form method="POST" action="{{ url_for('profile') }}" id="profile-form">
+    <div class="profile-form">
+
+      <!-- Medical Details -->
+      <div class="form-section fsec-medical">
+        <div class="fsec-head">
+          <div class="fsec-icon" style="background:rgba(232,23,58,0.12);">🩺</div>
+          <div>
+            <div class="fsec-title">Medical Information</div>
+            <div class="fsec-sub">Critical health data for emergency responders</div>
+          </div>
+        </div>
+        <div class="fsec-body">
+          <div class="field-grid-2" style="margin-bottom:1rem;">
+            <div class="form-field">
+              <label class="form-label" for="blood_group">Blood Group</label>
+              <select name="blood_group" id="blood_group" class="form-select">
+                <option value="">— Select —</option>
+                {% for bg in ['A+','A-','B+','B-','O+','O-','AB+','AB-'] %}
+                <option value="{{ bg }}" {{ 'selected' if user.blood_group == bg }}>{{ bg }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="dob">Date of Birth</label>
+              <input type="date" name="dob" id="dob" class="form-input"
+                     value="{{ user.dob or '' }}"/>
+            </div>
+          </div>
+
+          <div class="form-field" style="margin-bottom:1rem;">
+            <label class="form-label" for="allergies">Allergies</label>
+            <textarea name="allergies" id="allergies" class="form-textarea"
+              placeholder="e.g. Penicillin, Aspirin, Peanuts…">{{ user.allergies or '' }}</textarea>
+            <div class="form-hint">Separate with commas. This is shown prominently in emergencies.</div>
+          </div>
+
+          <div class="form-field" style="margin-bottom:1rem;">
+            <label class="form-label" for="chronic_conditions">Chronic Conditions</label>
+            <textarea name="chronic_conditions" id="chronic_conditions" class="form-textarea"
+              placeholder="e.g. Type 2 Diabetes, Hypertension, Asthma…">{{ user.chronic_conditions or '' }}</textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="medications">Current Medications</label>
+            <textarea name="medications" id="medications" class="form-textarea"
+              placeholder="e.g. Metformin 500mg, Lisinopril 10mg…">{{ user.medications or '' }}</textarea>
+            <div class="form-hint">Include dosage where possible.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contact -->
+      <div class="form-section fsec-contact">
+        <div class="fsec-head">
+          <div class="fsec-icon" style="background:rgba(245,158,11,0.1);">📞</div>
+          <div>
+            <div class="fsec-title">Emergency Contact</div>
+            <div class="fsec-sub">Who responders should call immediately</div>
+          </div>
+        </div>
+        <div class="fsec-body">
+          <div class="field-grid-3">
+            <div class="form-field">
+              <label class="form-label" for="emergency_contact_name">Contact Name</label>
+              <input type="text" name="emergency_contact_name" id="emergency_contact_name"
+                class="form-input" placeholder="Jane Doe"
+                value="{{ user.emergency_contact_name or '' }}"/>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="emergency_contact_phone">Phone Number</label>
+              <input type="tel" name="emergency_contact_phone" id="emergency_contact_phone"
+                class="form-input" placeholder="+1 555-0192"
+                value="{{ user.emergency_contact_phone or '' }}"/>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="emergency_contact_relation">Relationship</label>
+              <select name="emergency_contact_relation" id="emergency_contact_relation" class="form-select">
+                <option value="">— Select —</option>
+                {% set relations = ['Spouse','Parent','Child','Sibling','Friend','Guardian','Other'] %}
+                {% for r in relations %}
+                <option value="{{ r }}" {{ 'selected' if user.emergency_contact_relation == r }}>{{ r }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Bar -->
+      <div class="save-bar">
+        <div class="save-bar-msg">
+          <strong>⚠ Unsaved changes</strong> — your emergency profile will be updated immediately on save.
+        </div>
+        <div class="save-bar-btns">
+          <a href="{{ url_for('dashboard') }}" class="btn-cancel">Cancel</a>
+          <button type="submit" class="btn-save" id="save-profile-btn">
+            ✓ Save Profile
+          </button>
+        </div>
+      </div>
+
     </div>
-  </div>
-  <div class="card mb-3">
-    <div class="card-title"><div class="icon">🏥</div> Medical History</div>
-    <div class="grid-3">
-      <div class="form-group"><label class="form-label">Allergies</label><textarea name="allergies" class="form-control" placeholder="e.g. Penicillin, Shellfish">{{ user.allergies or '' }}</textarea></div>
-      <div class="form-group"><label class="form-label">Chronic Conditions</label><textarea name="chronic_conditions" class="form-control" placeholder="e.g. Type 2 Diabetes, Hypertension">{{ user.chronic_conditions or '' }}</textarea></div>
-      <div class="form-group"><label class="form-label">Current Medications</label><textarea name="medications" class="form-control" placeholder="e.g. Metformin 500mg">{{ user.medications or '' }}</textarea></div>
-    </div>
-  </div>
-  <div class="flex gap-1">
-    <button type="submit" class="btn btn-primary btn-lg">💾 Save Profile</button>
-    <a href="{{ url_for('dashboard') }}" class="btn btn-ghost btn-lg">Cancel</a>
-  </div>
-</form>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  setNavUser('{{ user.name | e }}', '{{ user.role | upper }}');
+</script>
 {% endblock %}

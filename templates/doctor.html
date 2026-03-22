@@ -1,36 +1,367 @@
 {% extends "base.html" %}
 {% block title %}Doctor Panel — LifeBeacon{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    flex-wrap:wrap; gap:1rem; margin-bottom:2rem;
+    padding-bottom:1.5rem; border-bottom:1px solid var(--border);
+  }
+  .page-eyebrow {
+    font-family:var(--font-head); font-size:0.68rem; font-weight:700;
+    letter-spacing:0.2em; text-transform:uppercase; color:var(--teal);
+    margin-bottom:0.3rem;
+  }
+  .page-title {
+    font-family:var(--font-display);
+    font-size:clamp(1.3rem,2.5vw,1.8rem);
+    font-weight:800; letter-spacing:0.04em;
+  }
+  .page-desc { font-size:0.85rem; color:var(--text-muted); margin-top:0.35rem; }
+
+  /* ── SEARCH BAR ──────────────────────────────────────────────────── */
+  .search-container {
+    position:relative; margin-bottom:2rem;
+  }
+  .search-wrap {
+    position:relative; display:flex; align-items:center;
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden;
+    transition:border-color 0.18s, box-shadow 0.18s;
+    box-shadow:0 4px 24px rgba(0,0,0,0.4);
+  }
+  .search-wrap:focus-within {
+    border-color:var(--teal-border);
+    box-shadow:0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(116,214,219,0.1);
+  }
+  .search-icon {
+    padding:0 1.1rem; color:var(--text-dim); font-size:1.1rem; flex-shrink:0;
+    transition:color 0.18s;
+  }
+  .search-wrap:focus-within .search-icon { color:var(--teal); }
+  .search-input {
+    flex:1; padding:1rem 0;
+    background:transparent; border:none; outline:none;
+    color:var(--text); font-family:var(--font-body);
+    font-size:1rem;
+  }
+  .search-input::placeholder { color:var(--text-ghost); }
+  .search-badge {
+    padding:0 1.1rem;
+    font-family:var(--font-head); font-size:0.68rem; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim);
+    flex-shrink:0;
+  }
+  .search-spinner {
+    display:none; width:18px; height:18px;
+    border:2px solid var(--border); border-top-color:var(--teal);
+    border-radius:50%; animation:spin 0.6s linear infinite;
+    margin:0 1rem; flex-shrink:0;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .search-spinner.active { display:block; }
+
+  /* Keyboard hint */
+  .search-hint {
+    display:flex; align-items:center; gap:0.75rem;
+    margin-top:0.65rem; padding:0 0.25rem;
+    font-family:var(--font-head); font-size:0.68rem;
+    letter-spacing:0.08em; color:var(--text-dim);
+  }
+  .kbd {
+    display:inline-block; padding:0.1rem 0.4rem;
+    background:var(--bg5); border:1px solid var(--border);
+    border-radius:3px; font-size:0.65rem; color:var(--text-muted);
+  }
+
+  /* ── RESULTS ─────────────────────────────────────────────────────── */
+  .results-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:0.85rem;
+  }
+  .results-label {
+    font-family:var(--font-head); font-size:0.7rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted);
+  }
+  .results-count {
+    font-family:var(--font-display); font-size:0.78rem; color:var(--teal);
+  }
+
+  /* Patient result cards */
+  .results-list {
+    display:flex; flex-direction:column; gap:0.85rem;
+  }
+  .result-card {
+    display:flex; align-items:center; gap:1.1rem;
+    padding:1.1rem 1.35rem;
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); text-decoration:none; color:var(--text);
+    transition:all 0.2s; cursor:pointer;
+    position:relative; overflow:hidden;
+  }
+  .result-card::before {
+    content:''; position:absolute;
+    left:0; top:0; bottom:0; width:0;
+    background:var(--teal); opacity:0.1;
+    transition:width 0.2s;
+  }
+  .result-card:hover {
+    border-color:var(--teal-border);
+    transform:translateX(4px);
+    box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  }
+  .result-card:hover::before { width:3px; }
+
+  .rc-avatar {
+    width:44px; height:44px; flex-shrink:0; border-radius:var(--r-md);
+    background:linear-gradient(135deg,var(--teal-dim),rgba(116,214,219,0.5));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:0.85rem;
+    font-weight:700; color:var(--bg);
+  }
+  .rc-info { flex:1; min-width:0; }
+  .rc-name {
+    font-family:var(--font-head); font-size:0.95rem; font-weight:700;
+    letter-spacing:0.02em; margin-bottom:0.2rem;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .rc-email {
+    font-size:0.78rem; color:var(--text-muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .rc-meta {
+    display:flex; align-items:center; gap:0.5rem; flex-shrink:0;
+    flex-wrap:wrap; justify-content:flex-end;
+  }
+  .rc-blood {
+    font-family:var(--font-display); font-size:0.78rem; font-weight:700;
+    padding:0.2rem 0.55rem;
+    background:rgba(232,23,58,0.12); color:var(--red-light);
+    border:1px solid rgba(232,23,58,0.25); border-radius:3px;
+  }
+  .rc-arrow {
+    color:var(--text-dim); font-size:1rem; transition:transform 0.18s;
+  }
+  .result-card:hover .rc-arrow { transform:translateX(3px); color:var(--teal); }
+
+  /* Empty / Initial states */
+  .state-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:3rem 2rem;
+    text-align:center;
+  }
+  .state-icon { font-size:2.5rem; margin-bottom:1rem; opacity:0.4; }
+  .state-title {
+    font-family:var(--font-display); font-size:0.95rem;
+    font-weight:700; letter-spacing:0.06em; margin-bottom:0.4rem;
+  }
+  .state-body { font-size:0.85rem; color:var(--text-muted); line-height:1.6; }
+
+  /* Stats row */
+  .doctor-stats {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:1rem; margin-bottom:2rem;
+  }
+  .dstat {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1.1rem 1.35rem;
+    position:relative; overflow:hidden;
+  }
+  .dstat::after {
+    content:''; position:absolute;
+    bottom:0;left:0;right:0; height:1px;
+    background:var(--teal-border);
+  }
+  .dstat-label {
+    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim);
+    margin-bottom:0.35rem;
+  }
+  .dstat-val {
+    font-family:var(--font-display); font-size:1.5rem;
+    font-weight:800; color:var(--teal);
+  }
+  .dstat-sub { font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem; }
+
+  @media(max-width:640px){
+    .doctor-stats { grid-template-columns:1fr 1fr; }
+    .rc-meta { display:none; }
+  }
+  @media(max-width:480px){
+    .doctor-stats { grid-template-columns:1fr; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+
+<!-- Header -->
 <div class="page-header">
-  <div><div class="page-title">Doctor Panel</div><div class="page-sub">Search and access patient profiles</div></div>
-  <span class="badge badge-blue">🩺 Verified Doctor</span>
+  <div>
+    <div class="page-eyebrow">Physician Interface</div>
+    <div class="page-title">Doctor Panel</div>
+    <div class="page-desc">Search and review patient medical profiles</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <span class="badge badge-teal">🔬 {{ user.role | capitalize }}</span>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
 </div>
-<div class="card card-accent mb-3">
-  <div class="card-title"><div class="icon">🔍</div> Search Patients</div>
-  <input type="text" id="searchInput" class="form-control" placeholder="Type patient name or email..." oninput="searchPatients()">
-  <div id="searchResults" style="margin-top:1rem;"></div>
+
+<!-- Doctor stat cards -->
+<div class="doctor-stats" id="doctor-stats">
+  <div class="dstat">
+    <div class="dstat-label">Panel Status</div>
+    <div class="dstat-val">Active</div>
+    <div class="dstat-sub">Full access granted</div>
+  </div>
+  <div class="dstat">
+    <div class="dstat-label">Search Scope</div>
+    <div class="dstat-val">Patients</div>
+    <div class="dstat-sub">Name &amp; email search</div>
+  </div>
+  <div class="dstat">
+    <div class="dstat-label">Access Level</div>
+    <div class="dstat-val">Doctor</div>
+    <div class="dstat-sub">Read-only patient profiles</div>
+  </div>
 </div>
+
+<!-- Search -->
+<div class="search-container" id="search-container">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input
+      type="text"
+      class="search-input"
+      id="patient-search"
+      placeholder="Search patients by name or email…"
+      autocomplete="off"
+      aria-label="Search patients"
+    />
+    <div class="search-spinner" id="search-spinner"></div>
+    <span class="search-badge" id="search-count-badge"></span>
+  </div>
+  <div class="search-hint">
+    <span class="kbd">Type</span> to search in real-time &nbsp;·&nbsp;
+    <span class="kbd">↵</span> to open first result
+  </div>
+</div>
+
+<!-- Results area -->
+<div id="search-results-area">
+  <!-- Initial state -->
+  <div class="state-card" id="search-initial-state">
+    <div class="state-icon">🔍</div>
+    <div class="state-title">Start Searching</div>
+    <div class="state-body">Type a patient name or email above to search the database.<br/>Results will appear instantly.</div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
 <script>
-let timeout;
-function searchPatients(){
-  clearTimeout(timeout);
-  timeout=setTimeout(async()=>{
-    const q=document.getElementById('searchInput').value.trim();
-    if(q.length<2){document.getElementById('searchResults').innerHTML='';return;}
-    const res=await fetch('/doctor/search?q='+encodeURIComponent(q));
-    const patients=await res.json();
-    if(!patients.length){document.getElementById('searchResults').innerHTML='<p class="text-muted text-sm">No patients found.</p>';return;}
-    let html='<div style="display:flex;flex-direction:column;gap:0.6rem;">';
-    patients.forEach(p=>{
-      html+=`<a href="/doctor/patient/${p.id}" style="text-decoration:none;display:flex;align-items:center;gap:1rem;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;color:var(--text);">
-        <div style="width:36px;height:36px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">${p.name.charAt(0).toUpperCase()}</div>
-        <div style="flex:1;"><div style="font-weight:600;">${p.name}</div><div style="font-size:0.82rem;color:var(--text-muted);">${p.email}</div></div>
-        ${p.blood_group?`<span class="badge badge-red">${p.blood_group}</span>`:''}
-        <span style="color:var(--text-muted);">→</span></a>`;
-    });
-    html+='</div>';
-    document.getElementById('searchResults').innerHTML=html;
-  },300);
-}
+  setNavUser('{{ user.name | e }}', '{{ user.role | upper }}');
+
+  const searchInput    = document.getElementById('patient-search');
+  const resultsArea    = document.getElementById('search-results-area');
+  const spinner        = document.getElementById('search-spinner');
+  const countBadge     = document.getElementById('search-count-badge');
+  const initialState   = document.getElementById('search-initial-state');
+
+  let debounceTimer;
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim();
+    clearTimeout(debounceTimer);
+
+    if (!q) {
+      resultsArea.innerHTML = '';
+      resultsArea.appendChild(initialState);
+      countBadge.textContent = '';
+      return;
+    }
+
+    debounceTimer = setTimeout(() => doSearch(q), 280);
+  });
+
+  // Enter key — open first result
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const first = resultsArea.querySelector('.result-card');
+      if (first) first.click();
+    }
+  });
+
+  async function doSearch(q) {
+    spinner.classList.add('active');
+    try {
+      const res  = await fetch(`/doctor/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      spinner.classList.remove('active');
+      renderResults(data, q);
+    } catch(err) {
+      spinner.classList.remove('active');
+      renderError();
+    }
+  }
+
+  function renderResults(patients, q) {
+    if (!patients.length) {
+      countBadge.textContent = '0 found';
+      resultsArea.innerHTML = `
+        <div class="state-card">
+          <div class="state-icon">🔬</div>
+          <div class="state-title">No Patients Found</div>
+          <div class="state-body">No patients match "<strong style="color:var(--text);">${escHtml(q)}</strong>".<br/>Try a different name or email address.</div>
+        </div>`;
+      return;
+    }
+
+    countBadge.textContent = `${patients.length} found`;
+
+    let html = `
+      <div class="results-header">
+        <div class="results-label">Patient Results</div>
+        <div class="results-count">${patients.length} match${patients.length!==1?'es':''}</div>
+      </div>
+      <div class="results-list" id="results-list">`;
+
+    for (const p of patients) {
+      const initials = p.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      html += `
+        <a href="/doctor/patient/${p.id}" class="result-card" id="patient-${p.id}">
+          <div class="rc-avatar">${escHtml(initials)}</div>
+          <div class="rc-info">
+            <div class="rc-name">${escHtml(p.name)}</div>
+            <div class="rc-email">${escHtml(p.email)}</div>
+          </div>
+          <div class="rc-meta">
+            ${p.blood_group ? `<span class="rc-blood">${escHtml(p.blood_group)}</span>` : ''}
+            <span class="rc-arrow">›</span>
+          </div>
+        </a>`;
+    }
+    html += '</div>';
+    resultsArea.innerHTML = html;
+  }
+
+  function renderError() {
+    countBadge.textContent = '';
+    resultsArea.innerHTML = `
+      <div class="state-card">
+        <div class="state-icon">⚠</div>
+        <div class="state-title">Search Error</div>
+        <div class="state-body">Could not fetch results. Please try again.</div>
+      </div>`;
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 </script>
 {% endblock %}

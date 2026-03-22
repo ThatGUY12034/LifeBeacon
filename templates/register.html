@@ -1,41 +1,305 @@
 {% extends "base.html" %}
-{% block title %}Create Account — LifeBeacon{% endblock %}
+{% block title %}Register — LifeBeacon{% endblock %}
+{% block meta_desc %}Create your LifeBeacon emergency medical ID profile in under 2 minutes.{% endblock %}
+
+{% block extra_head %}
+<style>
+  .main-wrap { display:flex; align-items:center; justify-content:center; }
+  .container {
+    display:flex; align-items:center; justify-content:center;
+    min-height: calc(100vh - 60px);
+    padding: 2rem 1rem;
+  }
+
+  .auth-card {
+    width:100%; max-width:480px;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden;
+    position:relative;
+    box-shadow:0 24px 80px rgba(0,0,0,0.5), 0 0 60px var(--red-glow);
+  }
+  .auth-card::before, .auth-card::after {
+    content:''; position:absolute;
+    width:18px; height:18px;
+    border-color:var(--red-border); border-style:solid; opacity:0.7;
+  }
+  .auth-card::before { top:10px; left:10px; border-width:2px 0 0 2px; }
+  .auth-card::after  { bottom:10px; right:10px; border-width:0 2px 2px 0; }
+
+  .auth-stripe {
+    height:3px;
+    background:linear-gradient(90deg, var(--red), var(--teal-dim), transparent);
+  }
+  .auth-header { padding:1.75rem 2.25rem 0; text-align:center; }
+  .auth-logo {
+    display:inline-flex; align-items:center; gap:0.6rem; margin-bottom:1.25rem;
+  }
+  .auth-logo-icon {
+    width:36px; height:36px; background:var(--grad-red);
+    border-radius:var(--r-sm);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; box-shadow:0 0 14px var(--red-glow-lg);
+  }
+  .auth-logo-text {
+    font-family:var(--font-display); font-size:0.95rem;
+    font-weight:700; letter-spacing:0.08em;
+  }
+  .auth-logo-text span { color:var(--red); }
+  .auth-title {
+    font-family:var(--font-display); font-size:1.15rem; font-weight:700;
+    letter-spacing:0.06em; margin-bottom:0.3rem;
+  }
+  .auth-subtitle { font-size:0.83rem; color:var(--text-muted); margin-bottom:1.25rem; }
+
+  .auth-body { padding:1.5rem 2.25rem 2rem; }
+
+  .auth-error {
+    display:flex; align-items:center; gap:0.6rem;
+    padding:0.75rem 1rem;
+    background:rgba(232,23,58,0.1); border:1px solid var(--red-border);
+    border-radius:var(--r-sm); font-size:0.84rem; color:var(--red-light);
+    margin-bottom:1.1rem;
+  }
+
+  /* Two-col layout for some fields */
+  .field-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:0.85rem;
+  }
+
+  .input-group { margin-bottom:1.1rem; }
+  .input-label {
+    display:block;
+    font-family:var(--font-head); font-size:0.67rem; font-weight:700;
+    letter-spacing:0.13em; text-transform:uppercase;
+    color:var(--text-dim); margin-bottom:0.4rem; transition:color 0.18s;
+  }
+  .input-group:focus-within .input-label { color:var(--red-light); }
+
+  .input-wrap { position:relative; }
+  .input-icon {
+    position:absolute; left:0.85rem; top:50%;
+    transform:translateY(-50%); color:var(--text-ghost);
+    font-size:0.88rem; pointer-events:none; transition:color 0.18s;
+  }
+  .input-group:focus-within .input-icon { color:var(--red-light); }
+
+  .form-input, .form-select {
+    width:100%; background:var(--bg3);
+    border:1px solid var(--border); border-bottom:2px solid var(--border);
+    border-radius:var(--r-sm);
+    padding:0.7rem 1rem 0.7rem 2.4rem;
+    color:var(--text); font-family:var(--font-body);
+    font-size:0.9rem; outline:none; transition:all 0.18s;
+    -webkit-appearance:none;
+  }
+  .form-input::placeholder { color:var(--text-ghost); }
+  .form-input:focus, .form-select:focus {
+    background:var(--bg4); border-color:transparent;
+    border-bottom-color:var(--red);
+    box-shadow:0 0 0 1px rgba(232,23,58,0.08);
+  }
+  .form-select {
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 0.85rem center;
+    padding-right:2rem; cursor:pointer;
+  }
+  .form-select option { background:var(--bg4); }
+
+  /* Role selector cards */
+  .role-selector {
+    display:grid; grid-template-columns:1fr 1fr; gap:0.65rem;
+    margin-bottom:1.1rem;
+  }
+  .role-card {
+    position:relative; cursor:pointer;
+  }
+  .role-card input[type="radio"] {
+    position:absolute; opacity:0; width:0; height:0;
+  }
+  .role-card-label {
+    display:flex; flex-direction:column; align-items:center;
+    gap:0.4rem; padding:0.9rem 0.5rem;
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--r-md); cursor:pointer;
+    transition:all 0.18s;
+    text-align:center;
+  }
+  .role-card input:checked + .role-card-label {
+    background:var(--red-glow); border-color:var(--red-border);
+    box-shadow:0 0 14px rgba(232,23,58,0.15);
+  }
+  .role-card-label:hover { border-color:var(--border-hover); }
+  .role-icon { font-size:1.4rem; }
+  .role-name {
+    font-family:var(--font-head); font-size:0.82rem; font-weight:700;
+    letter-spacing:0.06em; text-transform:uppercase;
+  }
+  .role-desc { font-size:0.72rem; color:var(--text-muted); }
+
+  /* Password strength bar */
+  .pwd-strength {
+    margin-top:0.4rem; height:2px;
+    background:var(--bg5); border-radius:1px; overflow:hidden;
+  }
+  .pwd-strength-bar {
+    height:100%; width:0%; transition:width 0.3s, background 0.3s;
+    border-radius:1px;
+  }
+
+  .btn-auth {
+    width:100%; padding:0.82rem;
+    background:var(--grad-red); color:#fff;
+    border:none; border-radius:var(--r-sm);
+    font-family:var(--font-head); font-size:0.9rem;
+    font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    cursor:pointer; transition:all 0.2s;
+    box-shadow:0 4px 20px var(--red-glow);
+    margin-top:0.5rem;
+  }
+  .btn-auth:hover { transform:translateY(-1px); box-shadow:0 8px 28px var(--red-glow-lg); }
+
+  .auth-divider {
+    display:flex; align-items:center; gap:0.85rem; margin:1.1rem 0;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+  .auth-divider span {
+    font-family:var(--font-head); font-size:0.65rem;
+    letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim);
+  }
+  .auth-footer-link { text-align:center; font-size:0.84rem; color:var(--text-muted); }
+  .auth-footer-link a { color:var(--red-light); font-weight:500; }
+  .auth-footer-link a:hover { color:var(--red); }
+
+  .auth-terms {
+    font-size:0.75rem; color:var(--text-dim); text-align:center;
+    margin-top:0.75rem; line-height:1.5;
+  }
+
+  @media(max-width:480px){
+    .auth-card { max-width:100%; }
+    .auth-header, .auth-body { padding-left:1.25rem; padding-right:1.25rem; }
+    .field-row { grid-template-columns:1fr; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div style="max-width:500px;margin:3rem auto;">
-  <div style="text-align:center;margin-bottom:2rem;">
-    <div style="width:52px;height:52px;background:var(--red);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 1rem;">❤</div>
-    <h1 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-0.03em;">Create Your Profile</h1>
-    <p class="text-muted mt-1">Join LifeBeacon — your emergency medical ID</p>
+<div class="auth-card" id="register-card">
+  <div class="auth-stripe"></div>
+
+  <div class="auth-header">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">❤️</div>
+      <div class="auth-logo-text">LIFE<span>BEACON</span></div>
+    </div>
+    <div class="auth-title">CREATE MEDICAL ID</div>
+    <div class="auth-subtitle">Your emergency profile, always accessible</div>
   </div>
-  <div class="card card-accent">
-    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
-    <form method="POST">
-      <div class="grid-2">
-        <div class="form-group">
-          <label class="form-label">Full Name</label>
-          <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+
+  <div class="auth-body">
+    {% if error %}
+    <div class="auth-error" id="register-error" role="alert">
+      <span>⚠</span> {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register') }}" id="register-form" novalidate>
+
+      <!-- Name -->
+      <div class="input-group" id="name-group">
+        <label class="input-label" for="reg-name">Full Name</label>
+        <div class="input-wrap">
+          <span class="input-icon">◈</span>
+          <input type="text" id="reg-name" name="name"
+            class="form-input" placeholder="Sarah Connor"
+            autocomplete="name" required/>
         </div>
-        <div class="form-group">
-          <label class="form-label">I am a</label>
-          <select name="role" class="form-control">
-            <option value="patient">Patient</option>
-            <option value="doctor">Doctor / Responder</option>
-          </select>
+      </div>
+
+      <!-- Email -->
+      <div class="input-group" id="reg-email-group">
+        <label class="input-label" for="reg-email">Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon">@</span>
+          <input type="email" id="reg-email" name="email"
+            class="form-input" placeholder="you@example.com"
+            autocomplete="email" required/>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+
+      <!-- Password -->
+      <div class="input-group" id="reg-pwd-group">
+        <label class="input-label" for="reg-password">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="reg-password" name="password"
+            class="form-input" placeholder="Min. 8 characters"
+            autocomplete="new-password" required minlength="8"
+            oninput="updateStrength(this.value)"/>
+        </div>
+        <div class="pwd-strength">
+          <div class="pwd-strength-bar" id="pwd-bar"></div>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input type="password" name="password" class="form-control" placeholder="Min. 6 characters" required minlength="6">
+
+      <!-- Role -->
+      <div class="input-group" id="role-group">
+        <label class="input-label">Account Role</label>
+        <div class="role-selector">
+          <div class="role-card">
+            <input type="radio" name="role" id="role-patient" value="patient" checked/>
+            <label class="role-card-label" for="role-patient">
+              <span class="role-icon">🧑‍⚕️</span>
+              <span class="role-name">Patient</span>
+              <span class="role-desc">Personal health ID</span>
+            </label>
+          </div>
+          <div class="role-card">
+            <input type="radio" name="role" id="role-doctor" value="doctor"/>
+            <label class="role-card-label" for="role-doctor">
+              <span class="role-icon">🔬</span>
+              <span class="role-name">Doctor</span>
+              <span class="role-desc">Patient search panel</span>
+            </label>
+          </div>
+        </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Create Account →</button>
+
+      <button type="submit" class="btn-auth" id="register-submit-btn">
+        ❤️ Create My Medical ID
+      </button>
+
+      <div class="auth-terms">
+        By registering you agree to our terms of service.<br/>
+        Your data is encrypted and never shared with third parties.
+      </div>
     </form>
-    <p class="text-muted text-sm" style="text-align:center;margin-top:1.25rem;">
-      Already have an account? <a href="/login" style="color:var(--red);text-decoration:none;">Sign in</a>
-    </p>
+
+    <div class="auth-divider"><span>or</span></div>
+    <div class="auth-footer-link">
+      Already have an account?
+      <a href="{{ url_for('login') }}" id="goto-login-link">Login →</a>
+    </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function updateStrength(val) {
+    const bar = document.getElementById('pwd-bar');
+    let score = 0;
+    if (val.length >= 8)  score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^a-zA-Z0-9]/.test(val)) score++;
+    const colors = ['', '#e8173a', '#f59e0b', '#74d6db', '#00e5a0'];
+    const widths = ['0%', '25%', '50%', '75%', '100%'];
+    bar.style.width  = widths[score];
+    bar.style.background = colors[score] || 'transparent';
+  }
+</script>
 {% endblock %}

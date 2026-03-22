@@ -1,157 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🚨 Emergency Medical ID — {{ user.name }}</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root{--red:#e8173a;--bg:#0a0b0f;--bg2:#111318;--bg3:#1a1d26;--border:rgba(255,255,255,0.08);--text:#f0f1f5;--text-muted:#6b7280}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.emergency-banner{background:var(--red);padding:1rem 1.5rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.75rem;animation:pulse-banner 2s infinite}
-@keyframes pulse-banner{0%,100%{background:#e8173a}50%{background:#c9102f}}
-.emergency-banner h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:0.05em;text-transform:uppercase}
-.container{max-width:640px;margin:0 auto;padding:2rem 1.5rem}
-.patient-name{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:0.25rem}
-.patient-sub{color:var(--text-muted);margin-bottom:2rem;font-size:0.95rem}
-.info-block{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;gap:1rem;align-items:flex-start}
-.info-icon{font-size:1.5rem;line-height:1;margin-top:0.1rem;flex-shrink:0}
-.info-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500}
-.info-value{font-size:1.05rem;font-weight:500;line-height:1.5}
-.info-value.critical{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--red)}
-.info-missing{color:var(--text-muted);font-style:italic;font-size:0.95rem}
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>⚠ EMERGENCY — {{ user.name }} — LifeBeacon</title>
+  <meta name="description" content="Emergency medical information for {{ user.name }}"/>
+  <!-- Prevent caching of emergency pages -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red:      #e8173a;
+      --red-dim:  #b01030;
+      --red-glow: rgba(232,23,58,0.25);
+      --red-deep: #93000a;
+      --bg:       #0c0e16;
+      --bg2:      #11131b;
+      --bg3:      #191b24;
+      --bg4:      #1d1f28;
+      --text:     #e2e1ee;
+      --muted:    #9ca3af;
+      --dim:      #5a6070;
+      --success:  #00e5a0;
+      --warning:  #f59e0b;
+      --border:   rgba(93,63,62,0.3);
+      --font-hud: 'Orbitron',monospace;
+      --font-hd:  'Rajdhani',sans-serif;
+      --font-b:   'Inter',sans-serif;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:var(--font-b);
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+    }
+    a { color:inherit; text-decoration:none; }
 
-/* Emergency contact box */
-.emergency-contact{
-  background:linear-gradient(135deg,rgba(232,23,58,0.12),rgba(232,23,58,0.06));
-  border:2px solid rgba(232,23,58,0.4);
-  border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem
-}
-.ec-title{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:#ff6b82;margin-bottom:0.75rem;font-weight:600}
-.ec-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem}
-.ec-icon{font-size:1.3rem;flex-shrink:0}
-.ec-detail-label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.1rem}
-.ec-detail-value{font-size:1.05rem;font-weight:600}
-.ec-phone-large{
-  font-family:'Syne',sans-serif;
-  font-size:1.6rem;
-  font-weight:800;
-  color:var(--red);
-  letter-spacing:0.05em;
-  background:rgba(232,23,58,0.08);
-  border:1px solid rgba(232,23,58,0.25);
-  border-radius:10px;
-  padding:0.75rem 1rem;
-  margin:0.75rem 0;
-  text-align:center;
-  word-break:break-all;
-}
-.call-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;background:var(--red);color:#fff;text-decoration:none;border-radius:12px;padding:0.9rem;font-size:1.1rem;font-weight:600;font-family:'Syne',sans-serif;margin-top:0.5rem;transition:background 0.2s}
-.call-btn:hover{background:#c9102f}
+    /* ── EMERGENCY BANNER ─────────────────────────────────────────── */
+    .emrg-banner {
+      background:var(--red);
+      padding:0;
+      position:relative; overflow:hidden;
+    }
+    .emrg-banner::before {
+      content:'';
+      position:absolute; inset:0;
+      background:repeating-linear-gradient(
+        45deg, transparent, transparent 8px,
+        rgba(0,0,0,0.06) 8px, rgba(0,0,0,0.06) 16px
+      );
+    }
+    .emrg-banner-inner {
+      position:relative; z-index:1;
+      display:flex; align-items:center; justify-content:center;
+      gap:1rem; padding:1rem 1.5rem; flex-wrap:wrap;
+    }
+    .emrg-pulse-dot {
+      width:14px; height:14px; background:#fff; border-radius:50%;
+      flex-shrink:0; box-shadow:0 0 0 0 rgba(255,255,255,0.4);
+      animation:emrgPulse 1.2s ease-out infinite;
+    }
+    @keyframes emrgPulse {
+      0%   { transform:scale(1); box-shadow:0 0 0 0 rgba(255,255,255,0.5); }
+      70%  { transform:scale(1.05); box-shadow:0 0 0 10px rgba(255,255,255,0); }
+      100% { transform:scale(1); box-shadow:0 0 0 0 rgba(255,255,255,0); }
+    }
+    .emrg-banner-text {
+      font-family:var(--font-hud);
+      font-size:clamp(0.85rem, 2vw, 1rem);
+      font-weight:800; letter-spacing:0.18em;
+      text-transform:uppercase; color:#fff;
+      text-shadow:0 1px 4px rgba(0,0,0,0.3);
+    }
+    .emrg-banner-sub {
+      font-family:var(--font-hd);
+      font-size:0.78rem; font-weight:600;
+      letter-spacing:0.12em; text-transform:uppercase;
+      color:rgba(255,255,255,0.8);
+    }
 
-.footer-note{text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)}
-.readonly-badge{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.8rem;font-size:0.75rem;color:var(--text-muted);margin-bottom:1.5rem}
-</style>
+    /* ── LOGO BAR ──────────────────────────────────────────────────── */
+    .logo-bar {
+      background:var(--bg2); border-bottom:1px solid var(--border);
+      padding:0.75rem 1.5rem;
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:0.5rem;
+    }
+    .logo-bar-brand {
+      display:flex; align-items:center; gap:0.5rem;
+      font-family:var(--font-hud); font-size:0.85rem;
+      font-weight:700; letter-spacing:0.08em; color:var(--text);
+    }
+    .logo-icon {
+      width:28px; height:28px;
+      background:linear-gradient(135deg,var(--red),var(--red-dim));
+      border-radius:3px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.85rem; box-shadow:0 0 10px var(--red-glow);
+    }
+    .logo-span { color:var(--red); }
+    .logo-bar-ts {
+      font-family:var(--font-hd); font-size:0.7rem; font-weight:600;
+      letter-spacing:0.1em; text-transform:uppercase; color:var(--dim);
+    }
+
+    /* ── MAIN LAYOUT ────────────────────────────────────────────────── */
+    .emrg-main { max-width:720px; margin:0 auto; padding:1.5rem 1rem 3rem; }
+
+    /* Patient header */
+    .patient-header {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:8px; padding:1.5rem;
+      margin-bottom:1.5rem;
+      display:flex; align-items:center; gap:1.25rem;
+      flex-wrap:wrap;
+    }
+    .patient-avatar {
+      width:64px; height:64px;
+      background:linear-gradient(135deg,var(--red),var(--red-dim));
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-hud); font-size:1.2rem; font-weight:800;
+      color:#fff; flex-shrink:0;
+      box-shadow:0 0 20px var(--red-glow);
+    }
+    .patient-info { flex:1; }
+    .patient-label {
+      font-family:var(--font-hd); font-size:0.65rem; font-weight:700;
+      letter-spacing:0.18em; text-transform:uppercase; color:var(--red);
+      margin-bottom:0.2rem;
+    }
+    .patient-name {
+      font-family:var(--font-hud); font-size:clamp(1.4rem,4vw,1.9rem);
+      font-weight:800; letter-spacing:0.04em; line-height:1.1;
+    }
+    .patient-badges {
+      display:flex; align-items:center; gap:0.5rem;
+      flex-wrap:wrap; margin-top:0.5rem;
+    }
+    .pbadge {
+      display:inline-flex; align-items:center; gap:0.3rem;
+      padding:0.18rem 0.55rem;
+      border-radius:3px; font-family:var(--font-hd);
+      font-size:0.68rem; font-weight:700; letter-spacing:0.1em;
+      text-transform:uppercase;
+    }
+    .pb-red   { background:rgba(232,23,58,0.15); color:#ffb3b2; border:1px solid rgba(232,23,58,0.3); }
+    .pb-dim   { background:rgba(50,52,62,1); color:var(--muted); border:1px solid var(--border); }
+
+    /* ── BLOOD GROUP HERO ─────────────────────────────────────────── */
+    .blood-hero {
+      background:linear-gradient(135deg, #1a0a0e 0%, var(--bg2) 100%);
+      border:2px solid var(--red);
+      border-radius:8px; padding:2rem;
+      margin-bottom:1.5rem; text-align:center;
+      position:relative; overflow:hidden;
+      box-shadow:0 0 40px var(--red-glow), inset 0 0 40px rgba(232,23,58,0.05);
+      animation:bloodPulse 3s ease-in-out infinite;
+    }
+    @keyframes bloodPulse {
+      0%,100%{box-shadow:0 0 30px var(--red-glow), inset 0 0 30px rgba(232,23,58,0.04);}
+      50%{box-shadow:0 0 60px rgba(232,23,58,0.35), inset 0 0 60px rgba(232,23,58,0.08);}
+    }
+    .blood-hero::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(circle at center, rgba(232,23,58,0.08) 0%, transparent 70%);
+    }
+    .blood-label {
+      font-family:var(--font-hd); font-size:0.72rem; font-weight:700;
+      letter-spacing:0.2em; text-transform:uppercase; color:var(--red);
+      opacity:0.8; margin-bottom:0.5rem;
+    }
+    .blood-value {
+      font-family:var(--font-hud);
+      font-size:clamp(5rem, 18vw, 8rem);
+      font-weight:900;
+      color:#fff;
+      line-height:1;
+      text-shadow: 0 0 40px rgba(232,23,58,0.6), 0 0 80px rgba(232,23,58,0.3);
+      position:relative; z-index:1;
+    }
+    .blood-na {
+      font-family:var(--font-hd); font-size:1.2rem;
+      color:var(--dim); font-weight:600; letter-spacing:0.08em;
+    }
+
+    /* ── EMERGENCY PHONE ──────────────────────────────────────────── */
+    .phone-card {
+      background:var(--bg2); border:2px solid rgba(245,158,11,0.4);
+      border-radius:8px; padding:1.5rem;
+      margin-bottom:1.5rem;
+      box-shadow:0 0 24px rgba(245,158,11,0.12);
+      position:relative; overflow:hidden;
+    }
+    .phone-card::before {
+      content:''; position:absolute; top:0;left:0;right:0; height:2px;
+      background:linear-gradient(90deg,var(--warning),transparent);
+    }
+    .phone-header {
+      display:flex; align-items:center; gap:0.5rem;
+      font-family:var(--font-hd); font-size:0.68rem; font-weight:700;
+      letter-spacing:0.18em; text-transform:uppercase; color:var(--warning);
+      margin-bottom:1.1rem;
+    }
+    .phone-row {
+      display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+    }
+    .phone-info { flex:1; }
+    .phone-relation {
+      font-family:var(--font-hd); font-size:0.7rem; font-weight:700;
+      letter-spacing:0.12em; text-transform:uppercase; color:var(--muted);
+      margin-bottom:0.2rem;
+    }
+    .phone-contact-name {
+      font-family:var(--font-hd); font-size:1.1rem; font-weight:700;
+      margin-bottom:0.35rem;
+    }
+    .phone-number {
+      font-family:var(--font-hud);
+      font-size:clamp(1.6rem, 5vw, 2.2rem);
+      font-weight:800; color:var(--success);
+      letter-spacing:0.04em; line-height:1.1;
+    }
+    .call-btn {
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; gap:0.35rem;
+      width:90px; height:90px; flex-shrink:0;
+      background:linear-gradient(135deg,#00e5a0,#00b37a);
+      border-radius:50%; border:none; cursor:pointer;
+      color:#000; font-family:var(--font-hd);
+      font-weight:700; font-size:0.72rem;
+      letter-spacing:0.08em; text-transform:uppercase;
+      box-shadow:0 0 20px rgba(0,229,160,0.35);
+      animation:callPulse 2s ease-in-out infinite;
+      text-decoration:none; flex-shrink:0;
+    }
+    @keyframes callPulse {
+      0%,100%{box-shadow:0 0 16px rgba(0,229,160,0.35);}
+      50%{box-shadow:0 0 32px rgba(0,229,160,0.55);}
+    }
+    .call-btn-icon { font-size:1.6rem; }
+    .phone-na {
+      font-family:var(--font-hd); color:var(--dim);
+      font-size:0.88rem; font-weight:500; font-style:italic;
+    }
+
+    /* ── INFO SECTIONS ──────────────────────────────────────────────── */
+    .info-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:1rem;
+      margin-bottom:1rem;
+    }
+    .info-card {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:8px; overflow:hidden;
+    }
+    .info-card.full { grid-column:1/-1; }
+    .ic-head {
+      background:var(--bg4); border-bottom:1px solid var(--border);
+      padding:0.75rem 1.1rem;
+      display:flex; align-items:center; gap:0.5rem;
+      font-family:var(--font-hd); font-size:0.68rem; font-weight:700;
+      letter-spacing:0.16em; text-transform:uppercase; color:var(--muted);
+    }
+    .ic-body { padding:1.1rem; }
+
+    /* Allergy tags */
+    .tag-cloud { display:flex; flex-wrap:wrap; gap:0.5rem; }
+    .tag {
+      padding:0.3rem 0.75rem; border-radius:3px;
+      font-family:var(--font-hd); font-size:0.8rem; font-weight:700;
+      letter-spacing:0.04em;
+    }
+    .tag-allergy {
+      background:rgba(232,23,58,0.15); color:#ffb3b2;
+      border:1px solid rgba(232,23,58,0.3);
+    }
+    .tag-condition {
+      background:rgba(245,158,11,0.1); color:var(--warning);
+      border:1px solid rgba(245,158,11,0.25);
+    }
+    .tag-med {
+      background:rgba(116,214,219,0.08); color:#74d6db;
+      border:1px solid rgba(116,214,219,0.2);
+    }
+
+    .info-na {
+      color:var(--dim); font-size:0.82rem; font-style:italic;
+    }
+
+    /* Text list */
+    .info-text {
+      font-size:0.88rem; color:var(--text); line-height:1.7;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────────────────────── */
+    .emrg-footer {
+      background:var(--bg2); border-top:1px solid var(--border);
+      padding:1.25rem 1.5rem;
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:0.75rem;
+      font-family:var(--font-hd); font-size:0.7rem;
+      letter-spacing:0.08em; color:var(--dim);
+    }
+    .emrg-footer-label {
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .emrg-footer-dot {
+      width:6px; height:6px; background:var(--success);
+      border-radius:50%; animation:blink 1.5s ease-in-out infinite;
+      box-shadow:0 0 6px var(--success);
+    }
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
+
+    @media(max-width:560px){
+      .info-grid { grid-template-columns:1fr; }
+      .info-card.full { grid-column:auto; }
+      .phone-row { flex-direction:column; align-items:flex-start; }
+      .call-btn { width:100%; height:54px; flex-direction:row; border-radius:6px; }
+      .patient-header { flex-direction:column; text-align:center; }
+      .patient-badges { justify-content:center; }
+    }
+  </style>
 </head>
 <body>
-<div class="emergency-banner">
-  <span style="font-size:1.4rem;">🚨</span>
-  <h1>Emergency Medical Information</h1>
-  <span style="font-size:1.4rem;">🚨</span>
-</div>
-<div class="container">
-  <div class="readonly-badge">🔒 Read-Only Emergency View</div>
-  <div class="patient-name">{{ user.name }}</div>
-  <div class="patient-sub">{% if user.dob %}DOB: {{ user.dob }}{% else %}Emergency Medical Profile{% endif %}</div>
 
-  <!-- Blood Group -->
-  <div class="info-block" style="border-color:rgba(232,23,58,0.3);">
-    <div class="info-icon">🩸</div>
-    <div>
-      <div class="info-label">Blood Group</div>
-      {% if user.blood_group %}<div class="info-value critical">{{ user.blood_group }}</div>
-      {% else %}<div class="info-value info-missing">Not on file</div>{% endif %}
-    </div>
-  </div>
-
-  <!-- Allergies -->
-  <div class="info-block">
-    <div class="info-icon">⚠️</div>
-    <div>
-      <div class="info-label">Known Allergies</div>
-      {% if user.allergies %}<div class="info-value" style="color:#fbbf24;">{{ user.allergies }}</div>
-      {% else %}<div class="info-value info-missing">None recorded</div>{% endif %}
-    </div>
-  </div>
-
-  <!-- Chronic Conditions -->
-  <div class="info-block">
-    <div class="info-icon">🏥</div>
-    <div>
-      <div class="info-label">Chronic Conditions</div>
-      {% if user.chronic_conditions %}<div class="info-value">{{ user.chronic_conditions }}</div>
-      {% else %}<div class="info-value info-missing">None recorded</div>{% endif %}
-    </div>
-  </div>
-
-  <!-- Medications -->
-  <div class="info-block">
-    <div class="info-icon">💊</div>
-    <div>
-      <div class="info-label">Current Medications</div>
-      {% if user.medications %}<div class="info-value">{{ user.medications }}</div>
-      {% else %}<div class="info-value info-missing">None recorded</div>{% endif %}
-    </div>
-  </div>
-
-  <!-- Emergency Contact — fully visible -->
-  {% if user.emergency_contact_name or user.emergency_contact_phone %}
-  <div class="emergency-contact">
-    <div class="ec-title">🚨 Emergency Contact</div>
-
-    {% if user.emergency_contact_name %}
-    <div class="ec-row">
-      <div class="ec-icon">👤</div>
+  <!-- Emergency Banner -->
+  <div class="emrg-banner" role="alert" aria-live="assertive">
+    <div class="emrg-banner-inner">
+      <div class="emrg-pulse-dot"></div>
       <div>
-        <div class="ec-detail-label">Name</div>
-        <div class="ec-detail-value">{{ user.emergency_contact_name }}</div>
+        <div class="emrg-banner-text">⚠ EMERGENCY MEDICAL ACCESS</div>
+        <div class="emrg-banner-sub">For authorized medical personnel only</div>
+      </div>
+      <div class="emrg-pulse-dot"></div>
+    </div>
+  </div>
+
+  <!-- Logo Bar -->
+  <div class="logo-bar">
+    <div class="logo-bar-brand">
+      <div class="logo-icon">❤️</div>
+      LIFE<span class="logo-span">BEACON</span>
+    </div>
+    <div class="logo-bar-ts">Emergency Medical ID System</div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="emrg-main">
+
+    <!-- Patient ID -->
+    <div class="patient-header">
+      <div class="patient-avatar">
+        {{ user.name[:2].upper() if user.name else '??' }}
+      </div>
+      <div class="patient-info">
+        <div class="patient-label">Patient Identification</div>
+        <div class="patient-name">{{ user.name }}</div>
+        <div class="patient-badges">
+          {% if user.blood_group %}
+          <span class="pbadge pb-red">🩸 {{ user.blood_group }}</span>
+          {% endif %}
+          {% if user.dob %}
+          <span class="pbadge pb-dim">DOB: {{ user.dob }}</span>
+          {% endif %}
+        </div>
       </div>
     </div>
-    {% endif %}
 
-    {% if user.emergency_contact_relation %}
-    <div class="ec-row">
-      <div class="ec-icon">🤝</div>
-      <div>
-        <div class="ec-detail-label">Relationship</div>
-        <div class="ec-detail-value">{{ user.emergency_contact_relation }}</div>
+    <!-- Blood Group -->
+    <div class="blood-hero" id="blood-group-display">
+      <div class="blood-label">Blood Group</div>
+      {% if user.blood_group %}
+      <div class="blood-value">{{ user.blood_group }}</div>
+      {% else %}
+      <div class="blood-na">Not on record — verify with standard typing</div>
+      {% endif %}
+    </div>
+
+    <!-- Emergency Contact / Call -->
+    <div class="phone-card" id="emergency-contact-card">
+      <div class="phone-header">📞 Emergency Contact</div>
+      {% if user.emergency_contact_phone %}
+      <div class="phone-row">
+        <div class="phone-info">
+          <div class="phone-relation">{{ user.emergency_contact_relation or 'Contact' }}</div>
+          <div class="phone-contact-name">{{ user.emergency_contact_name or 'Emergency Contact' }}</div>
+          <div class="phone-number">{{ user.emergency_contact_phone }}</div>
+        </div>
+        <a href="tel:{{ user.emergency_contact_phone }}" class="call-btn" id="call-contact-btn" aria-label="Call emergency contact">
+          <span class="call-btn-icon">📞</span>
+          <span>CALL NOW</span>
+        </a>
       </div>
+      {% else %}
+      <p class="phone-na">No emergency contact on file.</p>
+      {% endif %}
     </div>
-    {% endif %}
 
-    {% if user.emergency_contact_phone %}
-    <div class="ec-detail-label" style="margin-top:0.5rem;">📞 Phone Number</div>
-    <div class="ec-phone-large">{{ user.emergency_contact_phone }}</div>
-    <a href="tel:{{ user.emergency_contact_phone }}" class="call-btn">
-      📱 Tap to Call — {{ user.emergency_contact_phone }}
-    </a>
-    {% endif %}
-  </div>
+    <!-- Medical Info Grid -->
+    <div class="info-grid">
 
-  {% else %}
-  <div class="info-block">
-    <div class="info-icon">📞</div>
-    <div>
-      <div class="info-label">Emergency Contact</div>
-      <div class="info-value info-missing">No emergency contact on file</div>
+      <!-- Allergies -->
+      <div class="info-card" id="allergies-card">
+        <div class="ic-head">⚠ Allergies</div>
+        <div class="ic-body">
+          {% if user.allergies %}
+          <div class="tag-cloud">
+            {% for a in user.allergies.split(',') %}
+            {% if a.strip() %}
+            <span class="tag tag-allergy">{{ a.strip() }}</span>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% else %}
+          <span class="info-na">None on record</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Chronic Conditions -->
+      <div class="info-card" id="conditions-card">
+        <div class="ic-head">🩺 Conditions</div>
+        <div class="ic-body">
+          {% if user.chronic_conditions %}
+          <div class="tag-cloud">
+            {% for c in user.chronic_conditions.split(',') %}
+            {% if c.strip() %}
+            <span class="tag tag-condition">{{ c.strip() }}</span>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% else %}
+          <span class="info-na">None on record</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Medications (full width) -->
+      <div class="info-card full" id="medications-card">
+        <div class="ic-head">💊 Current Medications</div>
+        <div class="ic-body">
+          {% if user.medications %}
+          <div class="tag-cloud">
+            {% for m in user.medications.split(',') %}
+            {% if m.strip() %}
+            <span class="tag tag-med">{{ m.strip() }}</span>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% else %}
+          <span class="info-na">None on record</span>
+          {% endif %}
+        </div>
+      </div>
+
     </div>
-  </div>
-  {% endif %}
+  </main>
 
-  <div class="footer-note">
-    Powered by <strong>LifeBeacon</strong> — Secure Emergency Medical ID<br>
-    Read-only emergency view. Data is securely stored in the cloud.
-  </div>
-</div>
+  <!-- Footer -->
+  <footer class="emrg-footer">
+    <div class="emrg-footer-label">
+      <div class="emrg-footer-dot"></div>
+      LIFEBEACON EMERGENCY ACCESS · DATA CURRENT AT ACCESS TIME
+    </div>
+    <div>lifebeacon.app</div>
+  </footer>
+
 </body>
 </html>

@@ -1,188 +1,663 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — LifeBeacon{% endblock %}
-{% block content %}
-<div class="page-header">
-  <div>
-    <div class="page-title">Hello, {{ user.name.split()[0] }} 👋</div>
-    <div class="page-sub">Your health dashboard</div>
-  </div>
-  <div class="flex gap-1">
-    <a href="{{ url_for('qr_page') }}" class="btn btn-ghost">📱 My QR Code</a>
-    <a href="{{ url_for('profile') }}" class="btn btn-primary">✏️ Update Profile</a>
-  </div>
-</div>
 
-<div class="grid-4 mb-3">
-  <div class="stat-card">
-    <div class="stat-label">Blood Group</div>
-    <div class="stat-value text-red">{{ user.blood_group or '—' }}</div>
-    <div class="stat-sub">On file</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">BP Readings</div>
-    <div class="stat-value">{{ readings_bp|length }}</div>
-    <div class="stat-sub">Total logged</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Sugar Readings</div>
-    <div class="stat-value">{{ readings_sugar|length }}</div>
-    <div class="stat-sub">Total logged</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Profile</div>
-    <div class="stat-value" style="font-size:1.3rem;">
-      {% if user.blood_group and user.emergency_contact_phone %}
-        <span style="color:var(--success)">✓ Complete</span>
-      {% else %}
-        <span style="color:var(--warning)">⚠ Partial</span>
+{% block extra_head %}
+<style>
+  /* ── GREETING ─────────────────────────────────────────────── */
+  .dash-greeting {
+    display:flex; align-items:flex-start;
+    justify-content:space-between; flex-wrap:wrap;
+    gap:1rem; margin-bottom:2rem;
+  }
+  .greeting-eyebrow {
+    font-family:var(--font-head); font-size:0.68rem; font-weight:700;
+    letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--red); margin-bottom:0.35rem;
+  }
+  .greeting-name {
+    font-family:var(--font-display);
+    font-size:clamp(1.5rem, 3vw, 2rem);
+    font-weight:800; letter-spacing:0.04em; line-height:1.15;
+  }
+  .greeting-meta {
+    display:flex; align-items:center; gap:0.75rem;
+    flex-wrap:wrap; margin-top:0.5rem;
+    font-size:0.82rem; color:var(--text-muted);
+  }
+  .greeting-actions { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
+
+  /* Live indicator */
+  .live-badge {
+    display:flex; align-items:center; gap:0.4rem;
+    padding:0.28rem 0.7rem;
+    background:rgba(0,229,160,0.08);
+    border:1px solid rgba(0,229,160,0.22);
+    border-radius:999px;
+    font-family:var(--font-head); font-size:0.68rem;
+    font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--success);
+  }
+  .live-dot {
+    width:6px; height:6px; background:var(--success); border-radius:50%;
+    box-shadow:0 0 8px var(--success);
+    animation:blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
+
+  /* ── STAT CARDS ────────────────────────────────────────────── */
+  .stat-row {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:1rem; margin-bottom:1.75rem;
+  }
+  .stat-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1.35rem 1.4rem;
+    position:relative; overflow:hidden; transition:all 0.22s;
+    cursor:default;
+  }
+  .stat-card:hover {
+    border-color:var(--border-hover);
+    transform:translateY(-2px);
+  }
+  /* Bottom accent line */
+  .stat-card::after {
+    content:''; position:absolute;
+    bottom:0;left:0;right:0; height:2px;
+  }
+  .sc-bp::after    { background:linear-gradient(90deg,var(--red),transparent); }
+  .sc-sugar::after { background:linear-gradient(90deg,var(--success),transparent); }
+  .sc-blood::after { background:linear-gradient(90deg,var(--warning),transparent); }
+  .sc-total::after { background:linear-gradient(90deg,var(--teal),transparent); }
+  /* Top glow */
+  .sc-bp::before    { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:var(--red-border); }
+  .sc-sugar::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:rgba(0,229,160,0.25); }
+  .sc-blood::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:rgba(245,158,11,0.25); }
+  .sc-total::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:var(--teal-border); }
+
+  .sc-icon {
+    width:36px; height:36px; border-radius:var(--r-sm);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; margin-bottom:0.85rem;
+  }
+  .sc-icon-red   { background:rgba(232,23,58,0.12); }
+  .sc-icon-green { background:rgba(0,229,160,0.1); }
+  .sc-icon-warn  { background:rgba(245,158,11,0.1); }
+  .sc-icon-teal  { background:rgba(116,214,219,0.1); }
+
+  .sc-label {
+    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--text-dim); margin-bottom:0.3rem;
+  }
+  .sc-value {
+    font-family:var(--font-display); font-size:1.65rem;
+    font-weight:800; line-height:1; letter-spacing:-0.01em;
+  }
+  .sc-unit { font-size:0.75rem; font-weight:400; color:var(--text-muted); margin-left:3px; }
+  .sc-sub { font-size:0.74rem; color:var(--text-muted); margin-top:0.35rem; }
+  .sc-sub a { color:var(--red); }
+
+  /* ── CHARTS ROW ─────────────────────────────────────────────── */
+  .charts-row {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1.25rem; margin-bottom:1.75rem;
+  }
+  .chart-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1.5rem;
+    position:relative; overflow:hidden;
+  }
+  .chart-card::before {
+    content:''; position:absolute;
+    top:0;left:0;right:0; height:2px;
+  }
+  .cc-bp::before    { background:linear-gradient(90deg,var(--red),transparent 60%); }
+  .cc-sugar::before { background:linear-gradient(90deg,var(--success),transparent 60%); }
+
+  .chart-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:1.25rem;
+  }
+  .chart-title {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.13em; text-transform:uppercase; color:var(--text-muted);
+  }
+  .chart-count { font-size:0.78rem; color:var(--text-dim); margin-top:0.15rem; }
+  .chart-wrap  { height:180px; position:relative; }
+
+  /* ── ADD READING CARD ───────────────────────────────────────── */
+  .log-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1.5rem;
+    position:relative; overflow:hidden; margin-bottom:1.75rem;
+  }
+  .log-card::before {
+    content:''; position:absolute; top:0;left:0;right:0; height:2px;
+    background:linear-gradient(90deg,var(--red),var(--success),transparent);
+  }
+
+  .log-card-top {
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem;
+  }
+  .log-label {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted);
+  }
+  .log-desc { font-size:0.8rem; color:var(--text-dim); margin-top:0.2rem; }
+
+  /* Type toggle */
+  .type-toggle {
+    display:flex; gap:0.4rem;
+    background:var(--bg4); border:1px solid var(--border);
+    border-radius:var(--r-md); padding:3px;
+  }
+  .toggle-btn {
+    padding:0.4rem 1rem; border-radius:3px;
+    font-family:var(--font-head); font-size:0.78rem; font-weight:700;
+    letter-spacing:0.06em; text-transform:uppercase;
+    border:none; background:transparent; color:var(--text-muted);
+    cursor:pointer; transition:all 0.18s;
+  }
+  .toggle-btn.t-bp    { background:var(--red); color:#fff; }
+  .toggle-btn.t-sugar { background:var(--success); color:#000; }
+
+  /* Reading fields */
+  .reading-grid {
+    display:grid; grid-template-columns:1fr 1fr 1fr auto;
+    gap:0.75rem; align-items:end;
+  }
+  .field-mini {}
+  .field-label {
+    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--text-dim); display:block; margin-bottom:0.4rem;
+  }
+  .field-input {
+    width:100%; background:var(--bg3);
+    border:1px solid var(--border); border-bottom:2px solid var(--border);
+    border-radius:var(--r-sm); padding:0.62rem 0.85rem;
+    color:var(--text); font-family:var(--font-body); font-size:0.9rem;
+    outline:none; transition:all 0.18s;
+  }
+  .field-input::placeholder { color:var(--text-ghost); }
+  .field-input:focus {
+    background:var(--bg4); border-color:transparent;
+    border-bottom-color:var(--red);
+  }
+  .btn-log {
+    display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;
+    padding:0.62rem 1.1rem;
+    background:var(--grad-red); color:#fff;
+    border:none; border-radius:var(--r-sm);
+    font-family:var(--font-head); font-size:0.82rem; font-weight:700;
+    letter-spacing:0.07em; text-transform:uppercase;
+    cursor:pointer; transition:all 0.2s;
+    box-shadow:0 4px 14px var(--red-glow); white-space:nowrap;
+  }
+  .btn-log:hover { transform:translateY(-1px); box-shadow:0 6px 20px var(--red-glow-lg); }
+  .btn-log-sugar {
+    background:linear-gradient(135deg,#00e5a0,#00b37a);
+    box-shadow:0 4px 14px rgba(0,229,160,0.25); color:#000;
+  }
+
+  /* ── TABLES ROW ──────────────────────────────────────────────── */
+  .tables-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;
+  }
+  .table-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); overflow:hidden;
+  }
+  .table-card-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem 1.35rem;
+    background:var(--bg4); border-bottom:1px solid var(--border);
+  }
+  .tc-title {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted);
+  }
+
+  table.rt { width:100%; border-collapse:collapse; font-size:0.84rem; }
+  table.rt th {
+    padding:0.5rem 1rem; text-align:left;
+    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-dim); background:var(--bg3);
+    border-bottom:1px solid var(--border);
+  }
+  table.rt td {
+    padding:0.65rem 1rem;
+    border-bottom:1px solid rgba(255,255,255,0.025);
+    color:var(--text);
+  }
+  table.rt tbody tr:last-child td { border-bottom:none; }
+  table.rt tbody tr:hover td { background:rgba(255,255,255,0.02); }
+
+  .chip {
+    display:inline-block; padding:0.15rem 0.55rem;
+    border-radius:3px; font-size:0.76rem; font-weight:700;
+    font-family:var(--font-head); letter-spacing:0.04em;
+  }
+  .chip-bp    { background:rgba(232,23,58,0.12); color:var(--red-light); }
+  .chip-sugar { background:rgba(0,229,160,0.1); color:var(--success); }
+
+  .empty-state {
+    text-align:center; padding:2.5rem 1.5rem;
+    color:var(--text-dim); font-size:0.84rem;
+  }
+  .empty-icon { font-size:2rem; margin-bottom:0.6rem; opacity:0.5; }
+  .empty-cta  { color:var(--red); font-size:0.78rem; margin-top:0.35rem; }
+
+  /* Quick nav */
+  .quick-nav {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:1rem; margin-bottom:1.75rem;
+  }
+  .qn-card {
+    display:flex; align-items:center; gap:0.9rem;
+    padding:1.1rem 1.25rem;
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); text-decoration:none; color:var(--text);
+    transition:all 0.2s;
+  }
+  .qn-card:hover {
+    border-color:var(--red-border); background:var(--bg3);
+    transform:translateY(-2px); box-shadow:0 6px 20px var(--red-glow);
+  }
+  .qn-icon {
+    width:40px; height:40px; border-radius:var(--r-md);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; flex-shrink:0;
+  }
+  .qn-title {
+    font-family:var(--font-head); font-size:0.82rem;
+    font-weight:700; letter-spacing:0.04em; margin-bottom:0.15rem;
+  }
+  .qn-sub { font-size:0.73rem; color:var(--text-muted); }
+
+  /* Responsive */
+  @media(max-width:1024px){ .stat-row { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:768px){
+    .charts-row, .tables-row { grid-template-columns:1fr; }
+    .quick-nav { grid-template-columns:1fr; }
+    .reading-grid { grid-template-columns:1fr 1fr; }
+  }
+  @media(max-width:480px){
+    .stat-row { grid-template-columns:1fr 1fr; }
+    .reading-grid { grid-template-columns:1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Greeting ─────────────────────────────────────────────────── -->
+<div class="dash-greeting">
+  <div>
+    <div class="greeting-eyebrow">Mission Control</div>
+    <div class="greeting-name">{{ user.name }}</div>
+    <div class="greeting-meta">
+      <span>{{ user.email }}</span>
+      <span style="color:var(--border-hover);">|</span>
+      <span class="badge badge-dim">{{ user.role | capitalize }}</span>
+      {% if user.blood_group %}
+      <span class="badge badge-red">🩸 {{ user.blood_group }}</span>
       {% endif %}
     </div>
   </div>
+  <div class="greeting-actions">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <a href="{{ url_for('profile') }}" class="btn btn-ghost btn-sm">✏ Edit Profile</a>
+    <a href="{{ url_for('qr_page') }}" class="btn btn-primary btn-sm">▣ My QR Code</a>
+  </div>
 </div>
 
-{% if not user.blood_group or not user.emergency_contact_phone %}
-<div class="card" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.06);margin-bottom:1.5rem;">
-  <div class="flex items-center gap-2">
-    <span style="font-size:1.5rem;">⚠️</span>
+<!-- ── Quick Nav ─────────────────────────────────────────────────── -->
+<div class="quick-nav">
+  <a href="{{ url_for('profile') }}" class="qn-card" id="qn-profile">
+    <div class="qn-icon" style="background:rgba(232,23,58,0.12);">🩺</div>
     <div>
-      <div style="font-weight:600;margin-bottom:0.2rem;">Complete your medical profile</div>
-      <div class="text-muted text-sm">Add blood group, allergies, and emergency contact for full emergency access.</div>
+      <div class="qn-title">Medical Profile</div>
+      <div class="qn-sub">Blood group, allergies, medications</div>
     </div>
-    <a href="{{ url_for('profile') }}" class="btn btn-ghost" style="margin-left:auto;white-space:nowrap;">Complete Now →</a>
+  </a>
+  <a href="{{ url_for('qr_page') }}" class="qn-card" id="qn-qr">
+    <div class="qn-icon" style="background:rgba(116,214,219,0.1);">⬛</div>
+    <div>
+      <div class="qn-title">Emergency QR</div>
+      <div class="qn-sub">Download &amp; share your code</div>
+    </div>
+  </a>
+  {% if session.get('role') == 'doctor' %}
+  <a href="{{ url_for('doctor_panel') }}" class="qn-card" id="qn-doctor">
+    <div class="qn-icon" style="background:rgba(0,229,160,0.08);">🔬</div>
+    <div>
+      <div class="qn-title">Doctor Panel</div>
+      <div class="qn-sub">Search &amp; review patients</div>
+    </div>
+  </a>
+  {% else %}
+  <div class="qn-card" style="opacity:0.45;cursor:default;" id="qn-insights">
+    <div class="qn-icon" style="background:rgba(245,158,11,0.1);">📊</div>
+    <div>
+      <div class="qn-title">Health Insights</div>
+      <div class="qn-sub">Track readings over time</div>
+    </div>
   </div>
-</div>
-{% endif %}
-
-<div class="grid-2 mb-3">
-  <div class="card">
-    <div class="card-title"><div class="icon">🩸</div> Blood Pressure</div>
-    <canvas id="bpChart" height="180"></canvas>
-    {% if not readings_bp %}<p class="text-muted text-sm" style="text-align:center;padding:2rem 0;">No readings yet.</p>{% endif %}
-  </div>
-  <div class="card">
-    <div class="card-title"><div class="icon">🍬</div> Blood Sugar</div>
-    <canvas id="sugarChart" height="180"></canvas>
-    {% if not readings_sugar %}<p class="text-muted text-sm" style="text-align:center;padding:2rem 0;">No readings yet.</p>{% endif %}
-  </div>
-</div>
-
-<div class="grid-2 mb-3">
-  <div class="card">
-    <div class="card-title"><div class="icon">➕</div> Log Blood Pressure</div>
-    <form method="POST" action="{{ url_for('add_reading') }}">
-      <input type="hidden" name="type" value="bp">
-      <div class="grid-2">
-        <div class="form-group">
-          <label class="form-label">Systolic (mmHg)</label>
-          <input type="number" name="systolic" class="form-control" placeholder="120" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Diastolic (mmHg)</label>
-          <input type="number" name="diastolic" class="form-control" placeholder="80" required>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes (optional)</label>
-        <input type="text" name="notes" class="form-control" placeholder="e.g. After morning walk">
-      </div>
-      <button type="submit" class="btn btn-primary">Log BP Reading</button>
-    </form>
-  </div>
-  <div class="card">
-    <div class="card-title"><div class="icon">➕</div> Log Blood Sugar</div>
-    <form method="POST" action="{{ url_for('add_reading') }}">
-      <input type="hidden" name="type" value="sugar">
-      <div class="form-group">
-        <label class="form-label">Blood Sugar (mg/dL)</label>
-        <input type="number" name="sugar" class="form-control" placeholder="100" required>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes (optional)</label>
-        <input type="text" name="notes" class="form-control" placeholder="e.g. Fasting, Post-meal">
-      </div>
-      <button type="submit" class="btn btn-primary">Log Sugar Reading</button>
-    </form>
-  </div>
+  {% endif %}
 </div>
 
-<div class="grid-2">
-  <div class="card">
-    <div class="card-title"><div class="icon">📋</div> Recent BP Readings</div>
+<!-- ── Stat Cards ─────────────────────────────────────────────────── -->
+<div class="stat-row">
+  <!-- BP -->
+  <div class="stat-card sc-bp">
+    <div class="sc-icon sc-icon-red">💓</div>
+    <div class="sc-label">Blood Pressure</div>
     {% if readings_bp %}
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>Systolic</th><th>Diastolic</th><th>Status</th></tr></thead>
-        <tbody>
-          {% for r in readings_bp[:8] %}
-          <tr>
-            <td class="text-muted text-sm">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp else '—' }}</td>
-            <td><strong>{{ r.value1|int }}</strong></td>
-            <td>{{ r.value2|int }}</td>
-            <td>
-              {% if r.value1 < 120 and r.value2 < 80 %}<span class="badge badge-green">Normal</span>
-              {% elif r.value1 < 140 %}<span class="badge badge-orange">Elevated</span>
-              {% else %}<span class="badge badge-red">High</span>{% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="sc-value" style="color:var(--red);">
+      {{ readings_bp[0].value1 | int }}<span class="sc-unit">sys</span>
+      <span style="font-size:1rem;color:var(--text-dim);">/</span>
+      {{ readings_bp[0].value2 | int }}<span class="sc-unit">dia</span>
     </div>
-    {% else %}<p class="text-muted text-sm">No readings logged yet.</p>{% endif %}
+    <div class="sc-sub">mmHg &nbsp;·&nbsp; {{ readings_bp[0].timestamp.strftime('%b %d, %H:%M') if readings_bp[0].timestamp }}</div>
+    {% else %}
+    <div class="sc-value" style="color:var(--text-ghost);">—</div>
+    <div class="sc-sub">No readings yet</div>
+    {% endif %}
   </div>
-  <div class="card">
-    <div class="card-title"><div class="icon">📋</div> Recent Sugar Readings</div>
+
+  <!-- Sugar -->
+  <div class="stat-card sc-sugar">
+    <div class="sc-icon sc-icon-green">🩸</div>
+    <div class="sc-label">Sugar Level</div>
     {% if readings_sugar %}
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>Level (mg/dL)</th><th>Status</th><th>Note</th></tr></thead>
-        <tbody>
-          {% for r in readings_sugar[:8] %}
-          <tr>
-            <td class="text-muted text-sm">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp else '—' }}</td>
-            <td><strong>{{ r.value1|int }}</strong></td>
-            <td>
-              {% if r.value1 < 100 %}<span class="badge badge-green">Normal</span>
-              {% elif r.value1 < 126 %}<span class="badge badge-orange">Pre-diabetic</span>
-              {% else %}<span class="badge badge-red">High</span>{% endif %}
-            </td>
-            <td class="text-muted text-sm">{{ r.notes or '—' }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="sc-value" style="color:var(--success);">
+      {{ readings_sugar[0].value1 | int }}<span class="sc-unit">mg/dL</span>
     </div>
-    {% else %}<p class="text-muted text-sm">No readings logged yet.</p>{% endif %}
+    <div class="sc-sub">{{ readings_sugar[0].timestamp.strftime('%b %d, %H:%M') if readings_sugar[0].timestamp }}</div>
+    {% else %}
+    <div class="sc-value" style="color:var(--text-ghost);">—</div>
+    <div class="sc-sub">No readings yet</div>
+    {% endif %}
+  </div>
+
+  <!-- Blood Group -->
+  <div class="stat-card sc-blood">
+    <div class="sc-icon sc-icon-warn">🧬</div>
+    <div class="sc-label">Blood Group</div>
+    {% if user.blood_group %}
+    <div class="sc-value" style="color:var(--warning);">{{ user.blood_group }}</div>
+    <div class="sc-sub">On file</div>
+    {% else %}
+    <div class="sc-value" style="color:var(--text-ghost);">—</div>
+    <div class="sc-sub"><a href="{{ url_for('profile') }}">Set in profile →</a></div>
+    {% endif %}
+  </div>
+
+  <!-- Total -->
+  <div class="stat-card sc-total">
+    <div class="sc-icon sc-icon-teal">📈</div>
+    <div class="sc-label">Total Readings</div>
+    <div class="sc-value" style="color:var(--teal);">{{ (readings_bp|length) + (readings_sugar|length) }}</div>
+    <div class="sc-sub">{{ readings_bp|length }} BP &nbsp;·&nbsp; {{ readings_sugar|length }} Sugar</div>
   </div>
 </div>
 
+<!-- ── Charts ─────────────────────────────────────────────────────── -->
+<div class="charts-row">
+  <div class="chart-card cc-bp">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Blood Pressure Trend</div>
+        <div class="chart-count">Last {{ readings_bp|length }} readings</div>
+      </div>
+      <span class="badge badge-red">mmHg</span>
+    </div>
+    <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
+  </div>
+
+  <div class="chart-card cc-sugar">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Blood Sugar Trend</div>
+        <div class="chart-count">Last {{ readings_sugar|length }} readings</div>
+      </div>
+      <span class="badge badge-green">mg/dL</span>
+    </div>
+    <div class="chart-wrap"><canvas id="sugarChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ── Log Reading ─────────────────────────────────────────────────── -->
+<div class="log-card">
+  <div class="log-card-top">
+    <div>
+      <div class="log-label">Log New Reading</div>
+      <div class="log-desc">Track your health metrics in real-time</div>
+    </div>
+    <div class="type-toggle" id="type-toggle">
+      <button type="button" class="toggle-btn t-bp" id="btn-bp" onclick="selectType('bp')">💓 Blood Pressure</button>
+      <button type="button" class="toggle-btn" id="btn-sugar" onclick="selectType('sugar')">🩸 Sugar Level</button>
+    </div>
+  </div>
+
+  <form method="POST" action="{{ url_for('add_reading') }}" id="reading-form">
+    <input type="hidden" name="type" id="reading-type" value="bp"/>
+
+    <div id="fields-bp">
+      <div class="reading-grid">
+        <div class="field-mini">
+          <label class="field-label">Systolic (mmHg)</label>
+          <input type="number" name="systolic" class="field-input" id="input-systolic" placeholder="120" min="60" max="250"/>
+        </div>
+        <div class="field-mini">
+          <label class="field-label">Diastolic (mmHg)</label>
+          <input type="number" name="diastolic" class="field-input" id="input-diastolic" placeholder="80" min="40" max="180"/>
+        </div>
+        <div class="field-mini">
+          <label class="field-label">Notes (optional)</label>
+          <input type="text" name="notes" class="field-input" id="input-notes-bp" placeholder="After exercise…"/>
+        </div>
+        <button type="submit" class="btn-log" id="log-bp-btn">+ Log BP</button>
+      </div>
+    </div>
+
+    <div id="fields-sugar" style="display:none;">
+      <div class="reading-grid" style="grid-template-columns:1fr 1fr auto;">
+        <div class="field-mini">
+          <label class="field-label">Sugar Level (mg/dL)</label>
+          <input type="number" name="sugar" class="field-input" id="input-sugar" placeholder="95" min="40" max="600"/>
+        </div>
+        <div class="field-mini">
+          <label class="field-label">Notes (optional)</label>
+          <input type="text" name="notes" class="field-input" id="input-notes-sugar" placeholder="Fasting, post-meal…"/>
+        </div>
+        <button type="submit" class="btn-log btn-log-sugar" id="log-sugar-btn">+ Log Sugar</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ── Tables ─────────────────────────────────────────────────────── -->
+<div class="tables-row">
+  <!-- BP -->
+  <div class="table-card" id="bp-table-card">
+    <div class="table-card-head">
+      <div class="tc-title">💓 Recent BP Readings</div>
+      <span class="badge badge-red">{{ readings_bp|length }}</span>
+    </div>
+    {% if readings_bp %}
+    <table class="rt">
+      <thead>
+        <tr>
+          <th>Systolic</th><th>Diastolic</th>
+          <th>Date</th><th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in readings_bp[:8] %}
+        <tr>
+          <td><span class="chip chip-bp">{{ r.value1 | int }}</span></td>
+          <td><span class="chip chip-bp">{{ r.value2 | int }}</span></td>
+          <td style="color:var(--text-muted);font-size:0.8rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
+          <td style="color:var(--text-muted);font-size:0.8rem;">{{ r.notes or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">💓</div>
+      No BP readings yet
+      <div class="empty-cta">Log your first reading above →</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sugar -->
+  <div class="table-card" id="sugar-table-card">
+    <div class="table-card-head">
+      <div class="tc-title">🩸 Recent Sugar Readings</div>
+      <span class="badge badge-green">{{ readings_sugar|length }}</span>
+    </div>
+    {% if readings_sugar %}
+    <table class="rt">
+      <thead>
+        <tr>
+          <th>Level (mg/dL)</th><th>Date</th><th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in readings_sugar[:8] %}
+        <tr>
+          <td><span class="chip chip-sugar">{{ r.value1 | int }}</span></td>
+          <td style="color:var(--text-muted);font-size:0.8rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
+          <td style="color:var(--text-muted);font-size:0.8rem;">{{ r.notes or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🩸</div>
+      No sugar readings yet
+      <div class="empty-cta">Log your first reading above →</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Data islands -->
+<script type="application/json" id="bp-data">{{ readings_bp | tojson }}</script>
+<script type="application/json" id="sugar-data">{{ readings_sugar | tojson }}</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-async function loadCharts() {
-  const bpData = await fetch('/api/readings/bp').then(r=>r.json());
-  const sugarData = await fetch('/api/readings/sugar').then(r=>r.json());
-  const opts = {
-    responsive:true,
-    plugins:{legend:{labels:{color:'#9ca3af',font:{family:'DM Sans'}}}},
-    scales:{
-      x:{ticks:{color:'#6b7280',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},
-      y:{ticks:{color:'#6b7280',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}}
-    }
+  // Set nav user
+  setNavUser('{{ user.name | e }}', '{{ user.role | upper }}');
+
+  // Type toggle
+  function selectType(type) {
+    const isBP = type === 'bp';
+    document.getElementById('reading-type').value = type;
+    document.getElementById('fields-bp').style.display    = isBP ? 'block' : 'none';
+    document.getElementById('fields-sugar').style.display  = isBP ? 'none'  : 'block';
+    document.getElementById('btn-bp').className    = 'toggle-btn' + (isBP ? ' t-bp' : '');
+    document.getElementById('btn-sugar').className = 'toggle-btn' + (!isBP ? ' t-sugar' : '');
+  }
+
+  // Chart defaults
+  const chartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1d1f28', borderColor: 'rgba(93,63,62,0.4)',
+        borderWidth: 1, titleColor: '#e2e1ee', bodyColor: '#9ca3af',
+        padding: 10, cornerRadius: 4,
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+        ticks: { color: '#5a6070', font: { size: 10, family: 'Inter' } }
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+        ticks: { color: '#5a6070', font: { size: 10, family: 'Inter' } }
+      }
+    },
+    elements: { point: { hitRadius: 8 } }
   };
-  if(bpData.length){
-    new Chart(document.getElementById('bpChart'),{type:'line',data:{
-      labels:bpData.map(r=>r.timestamp),
-      datasets:[
-        {label:'Systolic',data:bpData.map(r=>r.value1),borderColor:'#e8173a',backgroundColor:'rgba(232,23,58,0.1)',tension:0.4,fill:true,pointRadius:4},
-        {label:'Diastolic',data:bpData.map(r=>r.value2),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',tension:0.4,fill:true,pointRadius:4}
-      ]},options:opts});
-  }
-  if(sugarData.length){
-    new Chart(document.getElementById('sugarChart'),{type:'line',data:{
-      labels:sugarData.map(r=>r.timestamp),
-      datasets:[{label:'Blood Sugar (mg/dL)',data:sugarData.map(r=>r.value1),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',tension:0.4,fill:true,pointRadius:4}]
-    },options:opts});
-  }
-}
-loadCharts();
+
+  // BP Chart
+  const bpReadings = JSON.parse(document.getElementById('bp-data').textContent);
+  const bpLabels   = [...bpReadings].reverse().map(r => {
+    const d = new Date(r.timestamp);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  });
+  const bpSys = [...bpReadings].reverse().map(r => r.value1);
+  const bpDia = [...bpReadings].reverse().map(r => r.value2);
+
+  const bpCtx  = document.getElementById('bpChart').getContext('2d');
+  const bpGrad = bpCtx.createLinearGradient(0, 0, 0, 180);
+  bpGrad.addColorStop(0, 'rgba(232,23,58,0.22)');
+  bpGrad.addColorStop(1, 'rgba(232,23,58,0)');
+
+  new Chart(bpCtx, {
+    type: 'line',
+    data: {
+      labels: bpLabels.length ? bpLabels : ['No data'],
+      datasets: [
+        {
+          label: 'Systolic',
+          data: bpSys.length ? bpSys : [0],
+          borderColor: '#e8173a', backgroundColor: bpGrad,
+          fill: true, tension: 0.4, borderWidth: 2,
+          pointBackgroundColor: '#e8173a', pointRadius: 3, pointHoverRadius: 5,
+        },
+        {
+          label: 'Diastolic',
+          data: bpDia.length ? bpDia : [0],
+          borderColor: 'rgba(232,23,58,0.4)', backgroundColor: 'transparent',
+          fill: false, tension: 0.4, borderWidth: 1.5,
+          borderDash: [4,3], pointRadius: 2, pointHoverRadius: 4,
+        }
+      ]
+    },
+    options: { ...chartDefaults }
+  });
+
+  // Sugar Chart
+  const sgReadings = JSON.parse(document.getElementById('sugar-data').textContent);
+  const sgLabels   = [...sgReadings].reverse().map(r => {
+    const d = new Date(r.timestamp);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  });
+  const sgVals = [...sgReadings].reverse().map(r => r.value1);
+
+  const sgCtx  = document.getElementById('sugarChart').getContext('2d');
+  const sgGrad = sgCtx.createLinearGradient(0, 0, 0, 180);
+  sgGrad.addColorStop(0, 'rgba(0,229,160,0.2)');
+  sgGrad.addColorStop(1, 'rgba(0,229,160,0)');
+
+  new Chart(sgCtx, {
+    type: 'line',
+    data: {
+      labels: sgLabels.length ? sgLabels : ['No data'],
+      datasets: [{
+        label: 'Sugar',
+        data: sgVals.length ? sgVals : [0],
+        borderColor: '#00e5a0', backgroundColor: sgGrad,
+        fill: true, tension: 0.4, borderWidth: 2,
+        pointBackgroundColor: '#00e5a0', pointRadius: 3, pointHoverRadius: 5,
+      }]
+    },
+    options: { ...chartDefaults }
+  });
 </script>
 {% endblock %}
