@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — LifeBeacon{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Hello, {{ user.name.split()[0] }} 👋</div>
+    <div class="page-sub">Your health dashboard</div>
+  </div>
+  <div class="flex gap-1">
+    <a href="{{ url_for('qr_page') }}" class="btn btn-ghost">📱 My QR Code</a>
+    <a href="{{ url_for('profile') }}" class="btn btn-primary">✏️ Update Profile</a>
+  </div>
+</div>
+
+<div class="grid-4 mb-3">
+  <div class="stat-card">
+    <div class="stat-label">Blood Group</div>
+    <div class="stat-value text-red">{{ user.blood_group or '—' }}</div>
+    <div class="stat-sub">On file</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">BP Readings</div>
+    <div class="stat-value">{{ readings_bp|length }}</div>
+    <div class="stat-sub">Total logged</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Sugar Readings</div>
+    <div class="stat-value">{{ readings_sugar|length }}</div>
+    <div class="stat-sub">Total logged</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Profile</div>
+    <div class="stat-value" style="font-size:1.3rem;">
+      {% if user.blood_group and user.emergency_contact_phone %}
+        <span style="color:var(--success)">✓ Complete</span>
+      {% else %}
+        <span style="color:var(--warning)">⚠ Partial</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if not user.blood_group or not user.emergency_contact_phone %}
+<div class="card" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.06);margin-bottom:1.5rem;">
+  <div class="flex items-center gap-2">
+    <span style="font-size:1.5rem;">⚠️</span>
+    <div>
+      <div style="font-weight:600;margin-bottom:0.2rem;">Complete your medical profile</div>
+      <div class="text-muted text-sm">Add blood group, allergies, and emergency contact for full emergency access.</div>
+    </div>
+    <a href="{{ url_for('profile') }}" class="btn btn-ghost" style="margin-left:auto;white-space:nowrap;">Complete Now →</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="grid-2 mb-3">
+  <div class="card">
+    <div class="card-title"><div class="icon">🩸</div> Blood Pressure</div>
+    <canvas id="bpChart" height="180"></canvas>
+    {% if not readings_bp %}<p class="text-muted text-sm" style="text-align:center;padding:2rem 0;">No readings yet.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="icon">🍬</div> Blood Sugar</div>
+    <canvas id="sugarChart" height="180"></canvas>
+    {% if not readings_sugar %}<p class="text-muted text-sm" style="text-align:center;padding:2rem 0;">No readings yet.</p>{% endif %}
+  </div>
+</div>
+
+<div class="grid-2 mb-3">
+  <div class="card">
+    <div class="card-title"><div class="icon">➕</div> Log Blood Pressure</div>
+    <form method="POST" action="{{ url_for('add_reading') }}">
+      <input type="hidden" name="type" value="bp">
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Systolic (mmHg)</label>
+          <input type="number" name="systolic" class="form-control" placeholder="120" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Diastolic (mmHg)</label>
+          <input type="number" name="diastolic" class="form-control" placeholder="80" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input type="text" name="notes" class="form-control" placeholder="e.g. After morning walk">
+      </div>
+      <button type="submit" class="btn btn-primary">Log BP Reading</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="icon">➕</div> Log Blood Sugar</div>
+    <form method="POST" action="{{ url_for('add_reading') }}">
+      <input type="hidden" name="type" value="sugar">
+      <div class="form-group">
+        <label class="form-label">Blood Sugar (mg/dL)</label>
+        <input type="number" name="sugar" class="form-control" placeholder="100" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input type="text" name="notes" class="form-control" placeholder="e.g. Fasting, Post-meal">
+      </div>
+      <button type="submit" class="btn btn-primary">Log Sugar Reading</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title"><div class="icon">📋</div> Recent BP Readings</div>
+    {% if readings_bp %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Systolic</th><th>Diastolic</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for r in readings_bp[:8] %}
+          <tr>
+            <td class="text-muted text-sm">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp else '—' }}</td>
+            <td><strong>{{ r.value1|int }}</strong></td>
+            <td>{{ r.value2|int }}</td>
+            <td>
+              {% if r.value1 < 120 and r.value2 < 80 %}<span class="badge badge-green">Normal</span>
+              {% elif r.value1 < 140 %}<span class="badge badge-orange">Elevated</span>
+              {% else %}<span class="badge badge-red">High</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="text-muted text-sm">No readings logged yet.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="icon">📋</div> Recent Sugar Readings</div>
+    {% if readings_sugar %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Level (mg/dL)</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          {% for r in readings_sugar[:8] %}
+          <tr>
+            <td class="text-muted text-sm">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp else '—' }}</td>
+            <td><strong>{{ r.value1|int }}</strong></td>
+            <td>
+              {% if r.value1 < 100 %}<span class="badge badge-green">Normal</span>
+              {% elif r.value1 < 126 %}<span class="badge badge-orange">Pre-diabetic</span>
+              {% else %}<span class="badge badge-red">High</span>{% endif %}
+            </td>
+            <td class="text-muted text-sm">{{ r.notes or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="text-muted text-sm">No readings logged yet.</p>{% endif %}
+  </div>
+</div>
+
+<script>
+async function loadCharts() {
+  const bpData = await fetch('/api/readings/bp').then(r=>r.json());
+  const sugarData = await fetch('/api/readings/sugar').then(r=>r.json());
+  const opts = {
+    responsive:true,
+    plugins:{legend:{labels:{color:'#9ca3af',font:{family:'DM Sans'}}}},
+    scales:{
+      x:{ticks:{color:'#6b7280',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},
+      y:{ticks:{color:'#6b7280',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}}
+    }
+  };
+  if(bpData.length){
+    new Chart(document.getElementById('bpChart'),{type:'line',data:{
+      labels:bpData.map(r=>r.timestamp),
+      datasets:[
+        {label:'Systolic',data:bpData.map(r=>r.value1),borderColor:'#e8173a',backgroundColor:'rgba(232,23,58,0.1)',tension:0.4,fill:true,pointRadius:4},
+        {label:'Diastolic',data:bpData.map(r=>r.value2),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',tension:0.4,fill:true,pointRadius:4}
+      ]},options:opts});
+  }
+  if(sugarData.length){
+    new Chart(document.getElementById('sugarChart'),{type:'line',data:{
+      labels:sugarData.map(r=>r.timestamp),
+      datasets:[{label:'Blood Sugar (mg/dL)',data:sugarData.map(r=>r.value1),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',tension:0.4,fill:true,pointRadius:4}]
+    },options:opts});
+  }
+}
+loadCharts();
+</script>
+{% endblock %}

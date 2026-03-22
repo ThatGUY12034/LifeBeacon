@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}My QR Code — LifeBeacon{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">My Emergency QR Code</div><div class="page-sub">Scan this to see your emergency medical info</div></div>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">← Dashboard</a>
+</div>
+<div class="grid-2">
+  <div class="card card-accent" style="text-align:center;">
+    <div class="card-title" style="justify-content:center;"><div class="icon">📱</div> Your QR Code</div>
+    <div style="background:white;border-radius:12px;padding:1.25rem;display:inline-block;margin:0 auto 1.5rem;">
+      <img src="{{ url_for('qr_svg') }}" alt="QR Code" style="width:200px;height:200px;display:block;">
+    </div>
+    <div style="margin-bottom:1rem;">
+      <div class="text-muted text-sm mb-2">Emergency URL:</div>
+      <code style="background:var(--bg3);padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;word-break:break-all;display:block;border:1px solid var(--border);">
+        {{ request.host_url }}emergency/{{ user.qr_token }}
+      </code>
+    </div>
+    <div class="flex gap-1" style="justify-content:center;">
+      <a href="{{ url_for('qr_image') }}" download="lifebeacon-qr.png" class="btn btn-primary">⬇ Download PNG</a>
+      <a href="{{ request.host_url }}emergency/{{ user.qr_token }}" target="_blank" class="btn btn-ghost">👁 Preview</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="icon">ℹ️</div> What Doctors See</div>
+    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+      {% for icon,label,value in [('🩸','Blood Group',user.blood_group),('⚠️','Allergies',user.allergies),('🏥','Chronic Conditions',user.chronic_conditions),('💊','Medications',user.medications),('📞','Emergency Contact',user.emergency_contact_name)] %}
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;">
+        <span style="font-size:1.2rem;">{{ icon }}</span>
+        <div>
+          <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;">{{ label }}</div>
+          <div style="font-size:0.9rem;margin-top:0.1rem;">{% if value %}{{ value }}{% else %}<span class="text-muted">Not set</span>{% endif %}</div>
+        </div>
+        {% if not value %}<a href="{{ url_for('profile') }}" style="margin-left:auto;font-size:0.78rem;color:var(--red);text-decoration:none;">+ Add</a>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="divider"></div>
+    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:0.85rem;font-size:0.85rem;color:#34d399;">
+      🔒 Your email and password are <strong>never</strong> shown in the emergency view.
+    </div>
+  </div>
+</div>
+{% endblock %}

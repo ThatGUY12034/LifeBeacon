@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🚨 Emergency Medical ID — {{ user.name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e8173a;--bg:#0a0b0f;--bg2:#111318;--bg3:#1a1d26;--border:rgba(255,255,255,0.08);--text:#f0f1f5;--text-muted:#6b7280}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.emergency-banner{background:var(--red);padding:1rem 1.5rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.75rem;animation:pulse-banner 2s infinite}
+@keyframes pulse-banner{0%,100%{background:#e8173a}50%{background:#c9102f}}
+.emergency-banner h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:0.05em;text-transform:uppercase}
+.container{max-width:640px;margin:0 auto;padding:2rem 1.5rem}
+.patient-name{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:0.25rem}
+.patient-sub{color:var(--text-muted);margin-bottom:2rem;font-size:0.95rem}
+.info-block{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;gap:1rem;align-items:flex-start}
+.info-icon{font-size:1.5rem;line-height:1;margin-top:0.1rem;flex-shrink:0}
+.info-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500}
+.info-value{font-size:1.05rem;font-weight:500;line-height:1.5}
+.info-value.critical{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--red)}
+.info-missing{color:var(--text-muted);font-style:italic;font-size:0.95rem}
+.emergency-contact{background:linear-gradient(135deg,rgba(232,23,58,0.12),rgba(232,23,58,0.06));border:2px solid rgba(232,23,58,0.4);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.ec-title{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:#ff6b82;margin-bottom:0.6rem;font-weight:600}
+.ec-name{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700}
+.ec-phone{font-size:1.5rem;font-weight:700;color:var(--red);margin-top:0.2rem;letter-spacing:0.05em}
+.ec-rel{color:var(--text-muted);font-size:0.85rem;margin-top:0.2rem}
+.call-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;background:var(--red);color:#fff;text-decoration:none;border-radius:12px;padding:0.9rem;font-size:1.1rem;font-weight:600;font-family:'Syne',sans-serif;margin-top:0.75rem;transition:background 0.2s}
+.call-btn:hover{background:#c9102f}
+.footer-note{text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.readonly-badge{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.8rem;font-size:0.75rem;color:var(--text-muted);margin-bottom:1.5rem}
+</style>
+</head>
+<body>
+<div class="emergency-banner"><span style="font-size:1.4rem;">🚨</span><h1>Emergency Medical Information</h1><span style="font-size:1.4rem;">🚨</span></div>
+<div class="container">
+  <div class="readonly-badge">🔒 Read-Only Emergency View</div>
+  <div class="patient-name">{{ user.name }}</div>
+  <div class="patient-sub">{% if user.dob %}DOB: {{ user.dob }}{% else %}Emergency Medical Profile{% endif %}</div>
+
+  <div class="info-block" style="border-color:rgba(232,23,58,0.3);">
+    <div class="info-icon">🩸</div>
+    <div>
+      <div class="info-label">Blood Group</div>
+      {% if user.blood_group %}<div class="info-value critical">{{ user.blood_group }}</div>
+      {% else %}<div class="info-value info-missing">Not on file</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="info-block">
+    <div class="info-icon">⚠️</div>
+    <div>
+      <div class="info-label">Known Allergies</div>
+      {% if user.allergies %}<div class="info-value" style="color:#fbbf24;">{{ user.allergies }}</div>
+      {% else %}<div class="info-value info-missing">None recorded</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="info-block">
+    <div class="info-icon">🏥</div>
+    <div>
+      <div class="info-label">Chronic Conditions</div>
+      {% if user.chronic_conditions %}<div class="info-value">{{ user.chronic_conditions }}</div>
+      {% else %}<div class="info-value info-missing">None recorded</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="info-block">
+    <div class="info-icon">💊</div>
+    <div>
+      <div class="info-label">Current Medications</div>
+      {% if user.medications %}<div class="info-value">{{ user.medications }}</div>
+      {% else %}<div class="info-value info-missing">None recorded</div>{% endif %}
+    </div>
+  </div>
+
+  {% if user.emergency_contact_name or user.emergency_contact_phone %}
+  <div class="emergency-contact">
+    <div class="ec-title">📞 Emergency Contact</div>
+    <div class="ec-name">{{ user.emergency_contact_name or 'Unknown' }}</div>
+    {% if user.emergency_contact_relation %}<div class="ec-rel">{{ user.emergency_contact_relation }}</div>{% endif %}
+    {% if user.emergency_contact_phone %}
+    <div class="ec-phone">{{ user.emergency_contact_phone }}</div>
+    <a href="tel:{{ user.emergency_contact_phone }}" class="call-btn">📱 Call Emergency Contact</a>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="info-block"><div class="info-icon">📞</div><div><div class="info-label">Emergency Contact</div><div class="info-value info-missing">No emergency contact on file</div></div></div>
+  {% endif %}
+
+  <div class="footer-note">Powered by <strong>LifeBeacon</strong> — Secure Emergency Medical ID<br>Read-only emergency view. Data is securely stored in the cloud.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Create Account — LifeBeacon{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:3rem auto;">
+  <div style="text-align:center;margin-bottom:2rem;">
+    <div style="width:52px;height:52px;background:var(--red);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 1rem;">❤</div>
+    <h1 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-0.03em;">Create Your Profile</h1>
+    <p class="text-muted mt-1">Join LifeBeacon — your emergency medical ID</p>
+  </div>
+  <div class="card card-accent">
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+    <form method="POST">
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">I am a</label>
+          <select name="role" class="form-control">
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor / Responder</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Min. 6 characters" required minlength="6">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Create Account →</button>
+    </form>
+    <p class="text-muted text-sm" style="text-align:center;margin-top:1.25rem;">
+      Already have an account? <a href="/login" style="color:var(--red);text-decoration:none;">Sign in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

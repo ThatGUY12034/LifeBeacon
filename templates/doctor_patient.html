@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Patient: {{ patient.name }} — LifeBeacon{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">{{ patient.name }}</div><div class="page-sub">{{ patient.email }} · Dr. {{ doctor.name }}</div></div>
+  <a href="{{ url_for('doctor_panel') }}" class="btn btn-ghost">← Back</a>
+</div>
+<div class="grid-4 mb-3">
+  <div class="stat-card" style="border-color:rgba(232,23,58,0.3);"><div class="stat-label">Blood Group</div><div class="stat-value text-red">{{ patient.blood_group or '—' }}</div></div>
+  <div class="stat-card"><div class="stat-label">Date of Birth</div><div class="stat-value" style="font-size:1.1rem;">{{ patient.dob or '—' }}</div></div>
+  <div class="stat-card"><div class="stat-label">BP Readings</div><div class="stat-value">{{ readings_bp|length }}</div></div>
+  <div class="stat-card"><div class="stat-label">Sugar Readings</div><div class="stat-value">{{ readings_sugar|length }}</div></div>
+</div>
+<div class="grid-2 mb-3">
+  <div class="card">
+    <div class="card-title"><div class="icon">⚠️</div> Allergies</div>
+    {% if patient.allergies %}<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:1rem;color:#fbbf24;">{{ patient.allergies }}</div>
+    {% else %}<p class="text-muted">None on record</p>{% endif %}
+    <div style="margin-top:1.25rem;"><div class="card-title" style="margin-bottom:0.75rem;"><div class="icon">🏥</div> Chronic Conditions</div>
+    {% if patient.chronic_conditions %}<p>{{ patient.chronic_conditions }}</p>{% else %}<p class="text-muted">None on record</p>{% endif %}</div>
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom:0.75rem;"><div class="icon">💊</div> Medications</div>
+    {% if patient.medications %}<p>{{ patient.medications }}</p>{% else %}<p class="text-muted">None on record</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="icon">📞</div> Emergency Contact</div>
+    {% if patient.emergency_contact_name %}
+    <div style="background:rgba(232,23,58,0.08);border:1px solid rgba(232,23,58,0.25);border-radius:12px;padding:1.25rem;">
+      <div style="font-size:1.2rem;font-weight:700;margin-bottom:0.2rem;">{{ patient.emergency_contact_name }}</div>
+      {% if patient.emergency_contact_relation %}<div class="text-muted text-sm mb-2">{{ patient.emergency_contact_relation }}</div>{% endif %}
+      {% if patient.emergency_contact_phone %}
+      <div style="font-size:1.5rem;font-weight:700;color:var(--red);">{{ patient.emergency_contact_phone }}</div>
+      <a href="tel:{{ patient.emergency_contact_phone }}" class="btn btn-primary mt-2">📱 Call Contact</a>
+      {% endif %}
+    </div>
+    {% else %}<p class="text-muted">No emergency contact on file.</p>{% endif %}
+  </div>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title"><div class="icon">🩸</div> Blood Pressure History</div>
+    <canvas id="bpChart" height="200"></canvas>
+    {% if not readings_bp %}<p class="text-muted text-sm" style="text-align:center;padding:1rem;">No readings.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="icon">🍬</div> Blood Sugar History</div>
+    <canvas id="sugarChart" height="200"></canvas>
+    {% if not readings_sugar %}<p class="text-muted text-sm" style="text-align:center;padding:1rem;">No readings.</p>{% endif %}
+  </div>
+</div>
+<script>
+const bpData={{ readings_bp|map(attribute='value1')|list|tojson|safe }};
+const bpData2={{ readings_bp|map(attribute='value2')|list|tojson|safe }};
+const sugarData={{ readings_sugar|map(attribute='value1')|list|tojson|safe }};
+const opts={responsive:true,plugins:{legend:{labels:{color:'#9ca3af'}}},scales:{x:{ticks:{color:'#6b7280',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#6b7280'},grid:{color:'rgba(255,255,255,0.05)'}}}};
+if(bpData.length)new Chart(document.getElementById('bpChart'),{type:'line',data:{labels:bpData.map((_,i)=>'R'+(i+1)),datasets:[{label:'Systolic',data:bpData,borderColor:'#e8173a',tension:0.4,pointRadius:3},{label:'Diastolic',data:bpData2,borderColor:'#3b82f6',tension:0.4,pointRadius:3}]},options:opts});
+if(sugarData.length)new Chart(document.getElementById('sugarChart'),{type:'line',data:{labels:sugarData.map((_,i)=>'R'+(i+1)),datasets:[{label:'Blood Sugar',data:sugarData,borderColor:'#10b981',tension:0.4,pointRadius:3}]},options:opts});
+</script>
+{% endblock %}
