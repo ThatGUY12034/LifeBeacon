@@ -31,6 +31,8 @@ def get_db():
 def init_db():
     conn = get_db()
     cur = conn.cursor()
+    
+    # Create tables with ALL required columns
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -47,8 +49,13 @@ def init_db():
             emergency_contact_name TEXT,
             emergency_contact_phone TEXT,
             emergency_contact_relation TEXT,
-            medical_summary TEXT
+            medical_summary TEXT,
+            primary_doctor_id INTEGER,
+            last_diagnosis TEXT,
+            last_diagnosis_date TIMESTAMP,
+            current_condition_status TEXT DEFAULT 'stable'
         );
+        
         CREATE TABLE IF NOT EXISTS health_readings (
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL REFERENCES users(id),
@@ -58,6 +65,7 @@ def init_db():
             notes TEXT,
             timestamp TIMESTAMP DEFAULT NOW()
         );
+        
         CREATE TABLE IF NOT EXISTS medical_reports (
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL REFERENCES users(id),
@@ -67,15 +75,28 @@ def init_db():
             file_type TEXT NOT NULL,
             category TEXT NOT NULL,
             notes TEXT,
-            uploaded_at TIMESTAMP DEFAULT NOW()
+            uploaded_at TIMESTAMP DEFAULT NOW(),
+            doctor_id INTEGER REFERENCES users(id),
+            diagnosis TEXT,
+            severity TEXT DEFAULT 'normal'
         );
     """)
-    # Add medical_summary column if upgrading existing DB
+    
+    # Add missing columns if upgrading existing DB (for backward compatibility)
     try:
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS medical_summary TEXT;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_doctor_id INTEGER;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_diagnosis TEXT;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_diagnosis_date TIMESTAMP;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS current_condition_status TEXT DEFAULT 'stable';")
+        cur.execute("ALTER TABLE medical_reports ADD COLUMN IF NOT EXISTS doctor_id INTEGER;")
+        cur.execute("ALTER TABLE medical_reports ADD COLUMN IF NOT EXISTS diagnosis TEXT;")
+        cur.execute("ALTER TABLE medical_reports ADD COLUMN IF NOT EXISTS severity TEXT DEFAULT 'normal';")
         conn.commit()
-    except Exception:
+    except Exception as e:
+        print(f"Column addition error (may already exist): {e}")
         conn.rollback()
+    
     conn.commit()
     cur.close()
     conn.close()
@@ -262,7 +283,7 @@ def dashboard():
     readings_bp = cur.fetchall()
     cur.execute("SELECT * FROM health_readings WHERE user_id=%s AND reading_type='sugar' ORDER BY timestamp DESC LIMIT 20", (user['id'],))
     readings_sugar = cur.fetchall()
-    cur.execute("SELECT id,original_name,category,uploaded_at FROM medical_reports WHERE user_id=%s ORDER BY uploaded_at DESC LIMIT 5", (user['id'],))
+    cur.execute("SELECT id,original_name,category,file_type,uploaded_at FROM medical_reports WHERE user_id=%s ORDER BY uploaded_at DESC LIMIT 5", (user['id'],))
     recent_reports = cur.fetchall()
     cur.close(); conn.close()
     return render_template('dashboard.html', user=user,
@@ -477,7 +498,10 @@ def doctor_search():
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute(
-        "SELECT id,name,email,blood_group FROM users WHERE role='patient' AND (name ILIKE %s OR email ILIKE %s) LIMIT 10",
+        """SELECT id, name, email, blood_group, current_condition_status 
+           FROM users 
+           WHERE role='patient' AND (name ILIKE %s OR email ILIKE %s) 
+           LIMIT 10""",
         (f'%{q}%', f'%{q}%')
     )
     rows = cur.fetchall()
@@ -526,7 +550,7 @@ def doctor_patient_view(pid):
                 """, (pid, filename, file.filename, psycopg2.Binary(file_data), 
                       ext, category, notes, user['id'], diagnosis, severity))
                 
-                # Update patient's last diagnosis
+                # Update patient's last diagnosis and condition
                 if diagnosis:
                     cur2.execute("""
                         UPDATE users 
@@ -560,7 +584,7 @@ def doctor_patient_view(pid):
     """, (pid,))
     readings_sugar = cur.fetchall()
     
-    # Get patient's reports
+    # Get patient's reports with doctor names
     cur.execute("""
         SELECT mr.*, u.name as doctor_name 
         FROM medical_reports mr
