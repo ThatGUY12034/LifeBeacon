@@ -5,370 +5,734 @@
 <style>
   /* Back bar */
   .back-bar {
-    display:flex; align-items:center; gap:0.75rem;
-    margin-bottom:1.75rem; flex-wrap:wrap;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
   }
   .back-btn {
-    display:inline-flex; align-items:center; gap:0.4rem;
-    padding:0.42rem 0.9rem;
-    background:var(--bg4); border:1px solid var(--border);
-    border-radius:var(--r-sm); font-family:var(--font-head);
-    font-size:0.78rem; font-weight:700; letter-spacing:0.07em;
-    text-transform:uppercase; color:var(--text-muted);
-    transition:all 0.18s; text-decoration:none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.42rem 0.9rem;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: all 0.18s;
+    text-decoration: none;
   }
-  .back-btn:hover { color:var(--text); border-color:var(--border-hover); }
+  .back-btn:hover {
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
   .breadcrumb {
-    font-family:var(--font-head); font-size:0.72rem;
-    color:var(--text-dim); letter-spacing:0.06em;
-    display:flex; align-items:center; gap:0.4rem;
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
-  .breadcrumb span { color:var(--teal-dim); }
+  .breadcrumb span {
+    color: var(--teal-dim);
+  }
 
-  /* ── PATIENT HEADER ──────────────────────────────────────────────── */
+  /* ── PATIENT BANNER ──────────────────────────────────────────────── */
   .patient-banner {
-    background:var(--bg2); border:1px solid var(--border);
-    border-radius:var(--r-lg); overflow:hidden; margin-bottom:1.75rem;
-    position:relative;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+    position: relative;
   }
   .patient-banner::before {
-    content:''; display:block; height:3px;
-    background:linear-gradient(90deg,var(--teal-dim),var(--red),transparent);
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, var(--teal-dim), var(--red), transparent);
   }
   .pb-inner {
-    padding:1.75rem; display:flex; align-items:flex-start;
-    gap:1.5rem; flex-wrap:wrap;
+    padding: 1.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
   }
   .pb-avatar {
-    width:72px; height:72px; flex-shrink:0; border-radius:var(--r-md);
-    background:linear-gradient(135deg,var(--teal-dim),rgba(116,214,219,0.5));
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-display); font-size:1.4rem; font-weight:800;
-    color:var(--bg);
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, var(--teal-dim), rgba(116, 214, 219, 0.5));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--bg);
   }
-  .pb-info { flex:1; min-width:200px; }
+  .pb-info {
+    flex: 1;
+    min-width: 200px;
+  }
   .pb-label {
-    font-family:var(--font-head); font-size:0.65rem; font-weight:700;
-    letter-spacing:0.18em; text-transform:uppercase; color:var(--teal);
-    margin-bottom:0.25rem;
+    font-family: var(--font-head);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 0.25rem;
   }
   .pb-name {
-    font-family:var(--font-display);
-    font-size:clamp(1.3rem,3vw,1.9rem);
-    font-weight:800; letter-spacing:0.03em; margin-bottom:0.4rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 3vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.4rem;
   }
-  .pb-email { font-size:0.84rem; color:var(--text-muted); margin-bottom:0.65rem; }
-  .pb-tags { display:flex; flex-wrap:wrap; gap:0.5rem; }
-
+  .pb-email {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    margin-bottom: 0.65rem;
+  }
+  .pb-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
   .pb-meta {
-    display:grid; grid-template-columns:1fr 1fr 1fr;
-    gap:1px; background:var(--border);
-    border-top:1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
   }
   .pb-meta-item {
-    background:var(--bg3); padding:0.9rem 1.35rem;
+    background: var(--bg3);
+    padding: 0.9rem 1.35rem;
   }
   .pb-meta-label {
-    font-family:var(--font-head); font-size:0.62rem; font-weight:700;
-    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim);
-    margin-bottom:0.25rem;
+    font-family: var(--font-head);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
   }
   .pb-meta-val {
-    font-family:var(--font-head); font-size:0.92rem; font-weight:700;
+    font-family: var(--font-head);
+    font-size: 0.92rem;
+    font-weight: 700;
   }
 
-  /* ── UPLOAD REPORT CARD (NEW) ────────────────────────────────────── */
+  /* ── UPLOAD CARD (IMPROVED - MATCHES DASHBOARD STYLE) ────────────────── */
   .upload-card {
-    background:linear-gradient(135deg, rgba(59,130,246,0.05), rgba(59,130,246,0.01));
-    border:2px solid rgba(59,130,246,0.3);
-    border-radius:var(--r-lg);
-    margin-bottom:1.75rem;
-    position:relative;
-    overflow:hidden;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    margin-bottom: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .upload-card:hover {
+    border-color: var(--border-hover);
   }
   .upload-card::before {
-    content:''; position:absolute; top:0;left:0;right:0;
-    height:2px;
-    background:linear-gradient(90deg,var(--info),transparent);
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--info), var(--teal), transparent);
   }
   .upload-header {
-    padding:1rem 1.5rem;
-    background:var(--bg4);
-    border-bottom:1px solid var(--border);
-    display:flex;
-    align-items:center;
-    gap:0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--border);
   }
   .upload-header-icon {
-    width:32px; height:32px;
-    background:rgba(59,130,246,0.12);
-    border-radius:var(--r-sm);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1rem;
+    width: 32px;
+    height: 32px;
+    background: rgba(59, 130, 246, 0.12);
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
   }
   .upload-header-title {
-    font-family:var(--font-head);
-    font-size:0.72rem;
-    font-weight:700;
-    letter-spacing:0.13em;
-    text-transform:uppercase;
-    color:var(--info);
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
   .upload-body {
-    padding:1.5rem;
+    padding: 1.5rem;
   }
 
-  /* ── SEVERITY SELECTOR ───────────────────────────────────────────── */
+  /* Form Grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .form-group-full {
+    grid-column: 1 / -1;
+  }
+  .form-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.45rem;
+  }
+  .form-control,
+  .form-select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.18s;
+  }
+  .form-control:focus,
+  .form-select:focus {
+    border-color: transparent;
+    border-bottom-color: var(--red);
+    background: var(--bg4);
+    box-shadow: 0 0 0 1px rgba(232, 23, 58, 0.1), inset 0 -1px 0 var(--red);
+  }
+  .form-select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.2rem;
+  }
+  textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+  }
+  input[type="file"].form-control {
+    padding: 0.5rem 0.7rem;
+  }
+  input[type="file"].form-control::file-selector-button {
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.4rem 0.8rem;
+    color: var(--text);
+    cursor: pointer;
+    margin-right: 0.75rem;
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+  }
+
+  /* Severity Select with Visual Indicators */
   .severity-select {
-    background:var(--bg3);
-    border:1px solid var(--border);
-    border-radius:var(--r-sm);
-    padding:0.6rem;
-    color:var(--text);
-    font-family:var(--font-body);
-    font-size:0.9rem;
-    width:100%;
-    cursor:pointer;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.18s;
   }
   .severity-select:focus {
-    border-color:var(--red);
-    outline:none;
+    border-color: var(--red);
+    outline: none;
   }
-  .severity-critical {
-    border-left: 4px solid var(--red);
-    padding-left: 0.75rem;
+  .severity-option-critical {
+    color: var(--red);
+    font-weight: 600;
   }
-  .severity-moderate {
-    border-left: 4px solid var(--warning);
-    padding-left: 0.75rem;
+  .severity-option-moderate {
+    color: var(--warning);
+    font-weight: 600;
   }
-  .severity-mild {
-    border-left: 4px solid var(--info);
-    padding-left: 0.75rem;
-  }
-  .severity-normal {
-    border-left: 4px solid var(--success);
-    padding-left: 0.75rem;
+  .severity-option-mild {
+    color: var(--info);
+    font-weight: 600;
   }
 
-  /* ── REPORTS SECTION (NEW) ───────────────────────────────────────── */
+  /* ── REPORTS SECTION ───────────────────────────────────────── */
   .reports-section {
-    margin-bottom:1.75rem;
+    margin-bottom: 1.75rem;
   }
   .reports-header {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:1rem;
-    flex-wrap:wrap;
-    gap:0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
   .reports-title {
-    font-family:var(--font-head);
-    font-size:0.72rem;
-    font-weight:700;
-    letter-spacing:0.13em;
-    text-transform:uppercase;
-    color:var(--text-muted);
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
   .report-item {
-    background:var(--bg3);
-    border-radius:var(--r-md);
-    padding:1rem;
-    margin-bottom:0.75rem;
-    transition:all 0.2s;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 1.25rem;
+    margin-bottom: 0.85rem;
+    transition: all 0.2s;
   }
   .report-item:hover {
-    background:var(--bg4);
-    transform:translateX(4px);
+    border-color: var(--border-hover);
+    transform: translateX(4px);
   }
   .report-header {
-    display:flex;
-    justify-content:space-between;
-    align-items:start;
-    margin-bottom:0.5rem;
-    flex-wrap:wrap;
-    gap:0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
   .report-name {
-    font-weight:600;
-    font-size:0.95rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
   }
   .report-meta {
-    font-size:0.75rem;
-    color:var(--text-muted);
-    margin-top:0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
   .doctor-badge {
-    background:rgba(59,130,246,0.1);
-    color:var(--info);
-    padding:0.2rem 0.5rem;
-    border-radius:var(--r-sm);
-    font-size:0.7rem;
-    display:inline-block;
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--info);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--r-sm);
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
   }
   .diagnosis-box {
-    margin-top:0.75rem;
-    padding:0.75rem;
-    background:var(--bg2);
-    border-radius:var(--r-sm);
-    border-left:3px solid var(--teal);
+    margin-top: 0.85rem;
+    padding: 0.85rem;
+    background: var(--bg3);
+    border-radius: var(--r-md);
+    border-left: 3px solid var(--teal);
   }
   .diagnosis-text {
-    font-size:0.85rem;
-    margin-bottom:0.25rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin-bottom: 0.25rem;
   }
   .diagnosis-label {
-    font-size:0.7rem;
-    color:var(--text-muted);
-    text-transform:uppercase;
-    letter-spacing:0.05em;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
   }
 
-  /* ── EXISTING STYLES CONTINUE ────────────────────────────────────── */
-  /* (Keep all your existing styles below this line) */
-  .contact-card {
-    background:var(--bg2); border:1px solid rgba(245,158,11,0.3);
-    border-radius:var(--r-lg); overflow:hidden; margin-bottom:1.75rem;
-    box-shadow:0 0 20px rgba(245,158,11,0.08);
+  /* Badge Colors */
+  .badge-red {
+    background: rgba(232, 23, 58, 0.15);
+    color: var(--red);
+    border: 1px solid rgba(232, 23, 58, 0.3);
   }
-  .contact-card::before { content:''; display:block; height:2px; background:linear-gradient(90deg,var(--warning),transparent 60%); }
+  .badge-orange {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+  .badge-green {
+    background: rgba(0, 229, 160, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(0, 229, 160, 0.2);
+  }
+  .badge-info {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--info);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1.3rem;
+    border-radius: var(--r-sm);
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--grad-red);
+    color: #fff;
+    box-shadow: 0 4px 16px var(--red-glow);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px var(--red-glow-lg);
+  }
+  .btn-ghost {
+    background: var(--bg4);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: var(--border-hover);
+    background: var(--bg5);
+  }
+  .btn-sm {
+    padding: 0.38rem 0.85rem;
+    font-size: 0.75rem;
+  }
+  .btn-block {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Contact Card */
+  .contact-card {
+    background: var(--bg2);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+  }
+  .contact-card::before {
+    content: '';
+    display: block;
+    height: 2px;
+    background: linear-gradient(90deg, var(--warning), transparent 60%);
+  }
   .contact-head {
-    padding:0.9rem 1.35rem; background:var(--bg4); border-bottom:1px solid var(--border);
-    font-family:var(--font-head); font-size:0.7rem; font-weight:700;
-    letter-spacing:0.14em; text-transform:uppercase; color:var(--warning);
-    display:flex; align-items:center; gap:0.5rem;
+    padding: 0.9rem 1.35rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-head);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--warning);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   .contact-body {
-    padding:1.35rem;
-    display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;
+    padding: 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
   }
-  .contact-detail { flex:1; }
+  .contact-detail {
+    flex: 1;
+  }
   .contact-relation {
-    font-family:var(--font-head); font-size:0.66rem; font-weight:700;
-    letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim);
-    margin-bottom:0.2rem;
+    font-family: var(--font-head);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.2rem;
   }
   .contact-name {
-    font-family:var(--font-head); font-size:1rem;
-    font-weight:700; margin-bottom:0.25rem;
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
   }
   .contact-phone {
-    font-family:var(--font-display); font-size:1.4rem;
-    font-weight:800; color:var(--success);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--success);
   }
   .contact-call {
-    display:inline-flex; align-items:center; gap:0.4rem;
-    padding:0.55rem 1.1rem;
-    background:linear-gradient(135deg,#00e5a0,#00b37a); color:#000;
-    border:none; border-radius:var(--r-sm); font-family:var(--font-head);
-    font-size:0.82rem; font-weight:700; letter-spacing:0.08em;
-    text-transform:uppercase; cursor:pointer; transition:all 0.2s;
-    text-decoration:none;
-    box-shadow:0 4px 14px rgba(0,229,160,0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    background: linear-gradient(135deg, #00e5a0, #00b37a);
+    color: #000;
+    border: none;
+    border-radius: var(--r-sm);
+    font-family: var(--font-head);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(0, 229, 160, 0.25);
   }
-  .contact-call:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,229,160,0.35); }
+  .contact-call:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 229, 160, 0.35);
+  }
 
+  /* Charts */
   .charts-row {
-    display:grid; grid-template-columns:1fr 1fr;
-    gap:1.25rem; margin-bottom:1.75rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
   }
   .chart-card {
-    background:var(--bg2); border:1px solid var(--border);
-    border-radius:var(--r-lg); padding:1.5rem;
-    position:relative; overflow:hidden;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
   }
-  .chart-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; }
-  .cc-bp::before    { background:linear-gradient(90deg,var(--red),transparent 60%); }
-  .cc-sugar::before { background:linear-gradient(90deg,var(--success),transparent 60%); }
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+  .cc-bp::before {
+    background: linear-gradient(90deg, var(--red), transparent 60%);
+  }
+  .cc-sugar::before {
+    background: linear-gradient(90deg, var(--success), transparent 60%);
+  }
   .chart-title {
-    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
-    letter-spacing:0.13em; text-transform:uppercase; color:var(--text-muted);
-    margin-bottom:0.2rem;
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
   }
-  .chart-sub { font-size:0.76rem; color:var(--text-dim); margin-bottom:1.1rem; }
-  .chart-wrap { height:180px; position:relative; }
+  .chart-sub {
+    font-size: 0.76rem;
+    color: var(--text-dim);
+    margin-bottom: 1.1rem;
+  }
+  .chart-wrap {
+    height: 180px;
+    position: relative;
+  }
 
+  /* Medical Info Grid */
   .med-info-grid {
-    display:grid; grid-template-columns:1fr 1fr;
-    gap:1.25rem; margin-bottom:1.75rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
   }
   .info-card {
-    background:var(--bg2); border:1px solid var(--border);
-    border-radius:var(--r-lg); overflow:hidden;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
   }
   .ic-head {
-    background:var(--bg4); border-bottom:1px solid var(--border);
-    padding:0.85rem 1.35rem;
-    font-family:var(--font-head); font-size:0.68rem; font-weight:700;
-    letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted);
-    display:flex; align-items:center; gap:0.4rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--border);
+    padding: 0.85rem 1.35rem;
+    font-family: var(--font-head);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
-  .ic-body { padding:1.1rem; }
-  .ic-na { font-size:0.82rem; color:var(--text-dim); font-style:italic; }
-
-  .tag-cloud { display:flex; flex-wrap:wrap; gap:0.45rem; }
+  .ic-body {
+    padding: 1.1rem;
+  }
+  .ic-na {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
   .tag {
-    padding:0.28rem 0.65rem; border-radius:3px;
-    font-family:var(--font-head); font-size:0.78rem;
-    font-weight:700; letter-spacing:0.04em;
+    padding: 0.28rem 0.65rem;
+    border-radius: 3px;
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
   }
-  .tag-allergy   { background:rgba(232,23,58,0.12); color:var(--red-light); border:1px solid rgba(232,23,58,0.25); }
-  .tag-condition { background:rgba(245,158,11,0.1); color:var(--warning); border:1px solid rgba(245,158,11,0.22); }
-  .tag-med       { background:rgba(116,214,219,0.08); color:var(--teal); border:1px solid rgba(116,214,219,0.2); }
+  .tag-allergy {
+    background: rgba(232, 23, 58, 0.12);
+    color: var(--red-light);
+    border: 1px solid rgba(232, 23, 58, 0.25);
+  }
+  .tag-condition {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.22);
+  }
+  .tag-med {
+    background: rgba(116, 214, 219, 0.08);
+    color: var(--teal);
+    border: 1px solid rgba(116, 214, 219, 0.2);
+  }
 
+  /* Tables */
   .tables-row {
-    display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
   }
   .table-card {
-    background:var(--bg2); border:1px solid var(--border);
-    border-radius:var(--r-lg); overflow:hidden;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
   }
   .tc-head {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:0.9rem 1.35rem; background:var(--bg4);
-    border-bottom:1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.35rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--border);
   }
   .tc-title {
-    font-family:var(--font-head); font-size:0.7rem; font-weight:700;
-    letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted);
+    font-family: var(--font-head);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
-  table.rt { width:100%; border-collapse:collapse; font-size:0.83rem; }
+  table.rt {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+  }
   table.rt th {
-    padding:0.5rem 1rem; text-align:left;
-    font-family:var(--font-head); font-size:0.63rem; font-weight:700;
-    letter-spacing:0.1em; text-transform:uppercase;
-    color:var(--text-dim); background:var(--bg3);
-    border-bottom:1px solid var(--border);
+    padding: 0.5rem 1rem;
+    text-align: left;
+    font-family: var(--font-head);
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
   }
   table.rt td {
-    padding:0.62rem 1rem;
-    border-bottom:1px solid rgba(255,255,255,0.025); color:var(--text);
+    padding: 0.62rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+    color: var(--text);
   }
-  table.rt tbody tr:last-child td { border-bottom:none; }
-  table.rt tbody tr:hover td { background:rgba(255,255,255,0.02); }
+  table.rt tbody tr:last-child td {
+    border-bottom: none;
+  }
+  table.rt tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+  }
   .chip {
-    display:inline-block; padding:0.14rem 0.5rem;
-    border-radius:3px; font-family:var(--font-head);
-    font-size:0.74rem; font-weight:700;
+    display: inline-block;
+    padding: 0.14rem 0.5rem;
+    border-radius: 3px;
+    font-family: var(--font-head);
+    font-size: 0.74rem;
+    font-weight: 700;
   }
-  .chip-bp    { background:rgba(232,23,58,0.12); color:var(--red-light); }
-  .chip-sugar { background:rgba(0,229,160,0.1); color:var(--success); }
-
+  .chip-bp {
+    background: rgba(232, 23, 58, 0.12);
+    color: var(--red-light);
+  }
+  .chip-sugar {
+    background: rgba(0, 229, 160, 0.1);
+    color: var(--success);
+  }
   .empty-state {
-    padding:2rem; text-align:center;
-    color:var(--text-dim); font-size:0.83rem;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.83rem;
   }
 
-  @media(max-width:900px){
-    .charts-row, .tables-row, .med-info-grid { grid-template-columns:1fr; }
-    .pb-meta { grid-template-columns:1fr 1fr; }
+  /* Responsive */
+  @media (max-width: 900px) {
+    .charts-row,
+    .tables-row,
+    .med-info-grid {
+      grid-template-columns: 1fr;
+    }
+    .pb-meta {
+      grid-template-columns: 1fr 1fr;
+    }
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
   }
-  @media(max-width:640px){
-    .pb-meta { grid-template-columns:1fr; }
-    .pb-inner { gap:1rem; }
+  @media (max-width: 640px) {
+    .pb-meta {
+      grid-template-columns: 1fr;
+    }
+    .pb-inner {
+      gap: 1rem;
+    }
   }
 </style>
 {% endblock %}
@@ -377,14 +741,14 @@
 
 <!-- Back / Breadcrumb -->
 <div class="back-bar">
-  <a href="{{ url_for('doctor_panel') }}" class="back-btn" id="back-to-panel">← Doctor Panel</a>
+  <a href="{{ url_for('doctor_panel') }}" class="back-btn">← Doctor Panel</a>
   <div class="breadcrumb">
     <span>Doctor Panel</span> / {{ patient.name }}
   </div>
 </div>
 
 <!-- Patient Banner -->
-<div class="patient-banner" id="patient-banner">
+<div class="patient-banner">
   <div class="pb-inner">
     <div class="pb-avatar">
       {{ patient.name[:2].upper() if patient.name else '??' }}
@@ -408,26 +772,25 @@
       </div>
     </div>
   </div>
-
   <div class="pb-meta">
     <div class="pb-meta-item">
       <div class="pb-meta-label">Blood Group</div>
-      <div class="pb-meta-val" style="color:var(--red-light);">{{ patient.blood_group or '—' }}</div>
+      <div class="pb-meta-val" style="color: var(--red-light);">{{ patient.blood_group or '—' }}</div>
     </div>
     <div class="pb-meta-item">
       <div class="pb-meta-label">Total Readings</div>
-      <div class="pb-meta-val" style="color:var(--teal);">{{ (readings_bp|length) + (readings_sugar|length) }}</div>
+      <div class="pb-meta-val" style="color: var(--teal);">{{ (readings_bp|length) + (readings_sugar|length) }}</div>
     </div>
     <div class="pb-meta-item">
       <div class="pb-meta-label">Allergies</div>
-      <div class="pb-meta-val" style="color:var(--warning);">
+      <div class="pb-meta-val" style="color: var(--warning);">
         {{ patient.allergies.split(',') | length if patient.allergies else '0' }}
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── DOCTOR UPLOAD CARD (NEW) ─────────────────────────────────────── -->
+<!-- ── UPLOAD CARD (IMPROVED) ─────────────────────────────────────────── -->
 <div class="upload-card">
   <div class="upload-header">
     <div class="upload-header-icon">📋</div>
@@ -435,7 +798,7 @@
   </div>
   <div class="upload-body">
     <form method="POST" enctype="multipart/form-data">
-      <div class="grid-3">
+      <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Select File</label>
           <input type="file" name="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
@@ -444,7 +807,7 @@
         
         <div class="form-group">
           <label class="form-label">Category</label>
-          <select name="category" class="form-control">
+          <select name="category" class="form-select">
             <option value="General">General</option>
             <option value="Blood Pressure">Blood Pressure</option>
             <option value="Diabetes / Sugar">Diabetes / Sugar</option>
@@ -467,28 +830,28 @@
         <div class="form-group">
           <label class="form-label">Severity</label>
           <select name="severity" class="severity-select" id="severitySelect">
-            <option value="normal">📋 Normal/Routine</option>
+            <option value="normal">📋 Normal / Routine</option>
             <option value="mild">⚠️ Mild - Monitor</option>
             <option value="moderate">⚠️ Moderate - Requires Attention</option>
             <option value="critical">🚨 Critical - Immediate Action Required</option>
           </select>
         </div>
         
-        <div class="form-group">
-          <label class="form-label">Notes</label>
-          <input type="text" name="notes" class="form-control" 
-                 placeholder="Additional notes for this report">
+        <div class="form-group form-group-full">
+          <label class="form-label">Notes (Optional)</label>
+          <textarea name="notes" class="form-control" rows="2" 
+                    placeholder="Additional notes, treatment plan, or follow-up instructions..."></textarea>
         </div>
       </div>
       
-      <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+      <button type="submit" class="btn btn-primary btn-block">
         📤 Upload Report & Update Patient Record
       </button>
     </form>
   </div>
 </div>
 
-<!-- ── REPORTS SECTION (NEW) ────────────────────────────────────────── -->
+<!-- ── REPORTS SECTION ──────────────────────────────────────────────── -->
 <div class="reports-section">
   <div class="reports-header">
     <div class="reports-title">📁 Medical Reports & Diagnoses</div>
@@ -502,7 +865,9 @@
         <div>
           <div class="report-name">{{ r.original_name }}</div>
           <div class="report-meta">
-            {{ r.category }} • {{ r.uploaded_at.strftime('%B %d, %Y at %I:%M %p') }}
+            <span>{{ r.category }}</span>
+            <span>•</span>
+            <span>{{ r.uploaded_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
             {% if r.doctor_name %}
             <span class="doctor-badge">👨‍⚕️ Dr. {{ r.doctor_name }}</span>
             {% endif %}
@@ -536,14 +901,15 @@
   {% else %}
   <div class="empty-state">
     <div style="font-size: 2rem; margin-bottom: 0.5rem;">📂</div>
-    No medical reports yet. Upload a report above to add diagnosis.
+    <div>No medical reports yet</div>
+    <div class="text-muted text-sm mt-1">Upload a report above to add diagnosis</div>
   </div>
   {% endif %}
 </div>
 
 <!-- Emergency Contact -->
 {% if patient.emergency_contact_phone %}
-<div class="contact-card" id="emergency-contact-card">
+<div class="contact-card">
   <div class="contact-head">📞 Emergency Contact</div>
   <div class="contact-body">
     <div class="contact-detail">
@@ -551,7 +917,7 @@
       <div class="contact-name">{{ patient.emergency_contact_name or '—' }}</div>
       <div class="contact-phone">{{ patient.emergency_contact_phone }}</div>
     </div>
-    <a href="tel:{{ patient.emergency_contact_phone }}" class="contact-call" id="call-btn">
+    <a href="tel:{{ patient.emergency_contact_phone }}" class="contact-call">
       📞 Call Now
     </a>
   </div>
@@ -573,7 +939,7 @@
 </div>
 
 <!-- Medical Info -->
-<div class="med-info-grid" id="medical-info-grid">
+<div class="med-info-grid">
   <div class="info-card">
     <div class="ic-head">⚠ Allergies</div>
     <div class="ic-body">
@@ -604,7 +970,7 @@
     </div>
   </div>
 
-  <div class="info-card" style="grid-column:1/-1;">
+  <div class="info-card" style="grid-column: 1 / -1;">
     <div class="ic-head">💊 Current Medications</div>
     <div class="ic-body">
       {% if patient.medications %}
@@ -622,21 +988,23 @@
 
 <!-- Tables -->
 <div class="tables-row">
-  <div class="table-card" id="bp-table">
+  <div class="table-card">
     <div class="tc-head">
       <div class="tc-title">💓 BP Readings</div>
       <span class="badge badge-red">{{ readings_bp|length }}</span>
     </div>
     {% if readings_bp %}
     <table class="rt">
-      <thead><tr><th>Sys</th><th>Dia</th><th>Date</th><th>Notes</th></tr></thead>
+      <thead>
+        <tr><th>Sys</th><th>Dia</th><th>Date</th><th>Notes</th></tr>
+      </thead>
       <tbody>
         {% for r in readings_bp[:10] %}
         <tr>
           <td><span class="chip chip-bp">{{ r.value1 | int }}</span></td>
           <td><span class="chip chip-bp">{{ r.value2 | int }}</span></td>
-          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
-          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.notes or '—' }}</td>
+          <td style="color: var(--text-muted); font-size: 0.78rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
+          <td style="color: var(--text-muted); font-size: 0.78rem;">{{ r.notes or '—' }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -646,20 +1014,22 @@
     {% endif %}
   </div>
 
-  <div class="table-card" id="sugar-table">
+  <div class="table-card">
     <div class="tc-head">
       <div class="tc-title">🩸 Sugar Readings</div>
       <span class="badge badge-green">{{ readings_sugar|length }}</span>
     </div>
     {% if readings_sugar %}
     <table class="rt">
-      <thead><tr><th>mg/dL</th><th>Date</th><th>Notes</th></tr></thead>
+      <thead>
+        <tr><th>mg/dL</th><th>Date</th><th>Notes</th></tr>
+      </thead>
       <tbody>
         {% for r in readings_sugar[:10] %}
         <tr>
           <td><span class="chip chip-sugar">{{ r.value1 | int }}</span></td>
-          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
-          <td style="color:var(--text-muted);font-size:0.78rem;">{{ r.notes or '—' }}</td>
+          <td style="color: var(--text-muted); font-size: 0.78rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
+          <td style="color: var(--text-muted); font-size: 0.78rem;">{{ r.notes or '—' }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -689,61 +1059,110 @@
   }
 
   const chartOpts = {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{
-      legend:{display:false},
-      tooltip:{
-        backgroundColor:'#1d1f28', borderColor:'rgba(93,63,62,0.4)',
-        borderWidth:1, titleColor:'#e2e1ee', bodyColor:'#9ca3af',
-        padding:10, cornerRadius:4,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1d1f28',
+        borderColor: 'rgba(93,63,62,0.4)',
+        borderWidth: 1,
+        titleColor: '#e2e1ee',
+        bodyColor: '#9ca3af',
+        padding: 10,
+        cornerRadius: 4,
       }
     },
-    scales:{
-      x:{grid:{color:'rgba(255,255,255,0.03)',drawBorder:false},ticks:{color:'#5a6070',font:{size:10}}},
-      y:{grid:{color:'rgba(255,255,255,0.03)',drawBorder:false},ticks:{color:'#5a6070',font:{size:10}}}
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+        ticks: { color: '#5a6070', font: { size: 10, family: 'Inter' } }
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+        ticks: { color: '#5a6070', font: { size: 10, family: 'Inter' } }
+      }
     }
   };
 
+  // BP Chart
   const bpReadings = JSON.parse(document.getElementById('bp-data').textContent);
-  const bpLabels   = [...bpReadings].reverse().map(r => {
+  const bpLabels = [...bpReadings].reverse().map(r => {
     const d = new Date(r.timestamp);
-    return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short',day:'numeric'});
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   });
   const bpSys = [...bpReadings].reverse().map(r => r.value1);
   const bpDia = [...bpReadings].reverse().map(r => r.value2);
 
   const bpCtx = document.getElementById('bpChart').getContext('2d');
-  const bpG   = bpCtx.createLinearGradient(0,0,0,180);
-  bpG.addColorStop(0,'rgba(232,23,58,0.2)'); bpG.addColorStop(1,'rgba(232,23,58,0)');
+  const bpG = bpCtx.createLinearGradient(0, 0, 0, 180);
+  bpG.addColorStop(0, 'rgba(232,23,58,0.2)');
+  bpG.addColorStop(1, 'rgba(232,23,58,0)');
+  
   new Chart(bpCtx, {
-    type:'line',
-    data:{
-      labels:bpLabels.length?bpLabels:['No data'],
-      datasets:[
-        {label:'Systolic', data:bpSys.length?bpSys:[0], borderColor:'#e8173a', backgroundColor:bpG, fill:true, tension:0.4, borderWidth:2, pointBackgroundColor:'#e8173a', pointRadius:3, pointHoverRadius:5},
-        {label:'Diastolic',data:bpDia.length?bpDia:[0], borderColor:'rgba(232,23,58,0.4)',backgroundColor:'transparent',fill:false,tension:0.4,borderWidth:1.5,borderDash:[4,3],pointRadius:2}
+    type: 'line',
+    data: {
+      labels: bpLabels.length ? bpLabels : ['No data'],
+      datasets: [
+        {
+          label: 'Systolic',
+          data: bpSys.length ? bpSys : [0],
+          borderColor: '#e8173a',
+          backgroundColor: bpG,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+          pointBackgroundColor: '#e8173a',
+          pointRadius: 3,
+          pointHoverRadius: 5
+        },
+        {
+          label: 'Diastolic',
+          data: bpDia.length ? bpDia : [0],
+          borderColor: 'rgba(232,23,58,0.4)',
+          backgroundColor: 'transparent',
+          fill: false,
+          tension: 0.4,
+          borderWidth: 1.5,
+          borderDash: [4, 3],
+          pointRadius: 2
+        }
       ]
     },
-    options:{...chartOpts}
+    options: { ...chartOpts }
   });
 
+  // Sugar Chart
   const sgReadings = JSON.parse(document.getElementById('sugar-data').textContent);
-  const sgLabels   = [...sgReadings].reverse().map(r => {
+  const sgLabels = [...sgReadings].reverse().map(r => {
     const d = new Date(r.timestamp);
-    return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short',day:'numeric'});
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   });
   const sgVals = [...sgReadings].reverse().map(r => r.value1);
 
   const sgCtx = document.getElementById('sugarChart').getContext('2d');
-  const sgG   = sgCtx.createLinearGradient(0,0,0,180);
-  sgG.addColorStop(0,'rgba(0,229,160,0.18)'); sgG.addColorStop(1,'rgba(0,229,160,0)');
+  const sgG = sgCtx.createLinearGradient(0, 0, 0, 180);
+  sgG.addColorStop(0, 'rgba(0,229,160,0.18)');
+  sgG.addColorStop(1, 'rgba(0,229,160,0)');
+  
   new Chart(sgCtx, {
-    type:'line',
-    data:{
-      labels:sgLabels.length?sgLabels:['No data'],
-      datasets:[{label:'Sugar',data:sgVals.length?sgVals:[0],borderColor:'#00e5a0',backgroundColor:sgG,fill:true,tension:0.4,borderWidth:2,pointBackgroundColor:'#00e5a0',pointRadius:3,pointHoverRadius:5}]
+    type: 'line',
+    data: {
+      labels: sgLabels.length ? sgLabels : ['No data'],
+      datasets: [{
+        label: 'Sugar',
+        data: sgVals.length ? sgVals : [0],
+        borderColor: '#00e5a0',
+        backgroundColor: sgG,
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: '#00e5a0',
+        pointRadius: 3,
+        pointHoverRadius: 5
+      }]
     },
-    options:{...chartOpts}
+    options: { ...chartOpts }
   });
 </script>
 {% endblock %}
