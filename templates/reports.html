@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}Medical Reports — LifeBeacon{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* CATEGORY */
+  .category-link {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0.6rem 0.9rem;
+    border-radius:8px;
+    text-decoration:none;
+  }
+
+  .category-active {
+    background: var(--red);
+    color: #fff;
+  }
+
+  .category-inactive {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  /* FILE ICON */
+  .file-icon {
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.3rem;
+    flex-shrink:0;
+  }
+
+  .file-pdf {
+    background: rgba(232,23,58,0.1);
+  }
+
+  .file-img {
+    background: rgba(59,130,246,0.1);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">📁 Medical Reports</div>
+    <div class="page-sub">Upload and manage your medical documents securely</div>
+  </div>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">← Dashboard</a>
+</div>
+
+<!-- UPLOAD -->
+<div class="card card-accent mb-3">
+  <div class="card-title"><div class="icon">⬆️</div> Upload New Report</div>
+
+  <form method="POST" action="{{ url_for('upload_report') }}" enctype="multipart/form-data">
+    <div class="grid-3">
+
+      <div class="form-group">
+        <label class="form-label">Select File</label>
+        <input type="file" name="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
+        <div class="text-muted text-sm mt-1">PDF, PNG, JPG — max 5MB</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select name="category" class="form-control">
+          {% for cat in categories %}
+          <option value="{{ cat }}">{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input type="text" name="notes" class="form-control">
+      </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">⬆️ Upload Report</button>
+  </form>
+</div>
+
+<div class="grid-2" style="align-items:start;">
+
+  <!-- SIDEBAR -->
+  <div class="card" style="position:sticky;top:80px;">
+    <div class="card-title"><div class="icon">🗂️</div> Categories</div>
+
+    <div style="display:flex;flex-direction:column;gap:0.4rem;">
+
+      <!-- ALL -->
+      <a href="{{ url_for('reports') }}"
+         class="category-link {% if not active_category %}category-active{% else %}category-inactive{% endif %}">
+        <span>All Reports</span>
+        <span style="font-size:0.8rem;">
+          {% if reports %}{{ reports|length }}{% else %}0{% endif %}
+        </span>
+      </a>
+
+      <!-- LOOP -->
+      {% for cat in categories %}
+      <a href="{{ url_for('reports', category=cat) }}"
+         class="category-link {% if active_category == cat %}category-active{% else %}category-inactive{% endif %}">
+
+        <span>{{ cat }}</span>
+
+        {% if cat_counts and cat in cat_counts %}
+        <span style="background:rgba(255,255,255,0.2);
+                     border-radius:999px;
+                     padding:0.1rem 0.5rem;
+                     font-size:0.75rem;">
+          {{ cat_counts[cat] }}
+        </span>
+        {% endif %}
+
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="background:rgba(16,185,129,0.08);
+                border:1px solid rgba(16,185,129,0.2);
+                border-radius:10px;
+                padding:0.85rem;
+                font-size:0.82rem;
+                color:#34d399;">
+      🔒 Your reports are <strong>private</strong>.
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div>
+
+    {% if reports and reports|length > 0 %}
+
+    <div style="display:flex;flex-direction:column;gap:0.85rem;">
+
+      {% for r in reports %}
+      <div class="card" style="padding:1.25rem;">
+
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+
+          <!-- ICON -->
+          <div class="file-icon {% if r.file_type == 'pdf' %}file-pdf{% else %}file-img{% endif %}">
+            {% if r.file_type == 'pdf' %}📄{% else %}🖼️{% endif %}
+          </div>
+
+          <!-- INFO -->
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              {{ r.original_name }}
+            </div>
+
+            <div style="display:flex;gap:0.5rem;margin-top:0.3rem;flex-wrap:wrap;">
+              <span class="badge badge-blue">{{ r.category }}</span>
+
+              <span class="text-muted text-sm">
+                {% if r.uploaded_at %}
+                {{ r.uploaded_at.strftime('%b %d, %Y') }}
+                {% endif %}
+              </span>
+
+              {% if r.notes %}
+              <span class="text-muted text-sm">· {{ r.notes }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- ACTIONS -->
+          <div style="display:flex;gap:0.25rem;">
+            <a href="{{ url_for('view_report', report_id=r.id) }}"
+               target="_blank"
+               class="btn btn-ghost">
+              👁
+            </a>
+
+            <form method="POST"
+                  action="{{ url_for('delete_report', report_id=r.id) }}"
+                  onsubmit="return confirm('Delete?')">
+
+              <button type="submit" class="btn"
+                      style="background:rgba(232,23,58,0.1);color:var(--red);">
+                🗑
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="card" style="text-align:center;padding:3rem;">
+      <div style="font-size:3rem;">📂</div>
+      <div>No reports yet</div>
+    </div>
+
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

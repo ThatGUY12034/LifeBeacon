@@ -623,6 +623,13 @@
          class="nav-link {% if request.endpoint == 'qr_page' %}active{% endif %}">
         <span class="nav-link-icon">▣</span> QR Code
       </a>
+      <!-- Reports link - only for non-doctors -->
+      {% if session.get('role') != 'doctor' %}
+      <a href="{{ url_for('reports') }}"
+         class="nav-link {% if request.endpoint == 'reports' %}active{% endif %}">
+        <span class="nav-link-icon">📁</span> Reports
+      </a>
+      {% endif %}
       {% if session.get('role') == 'doctor' %}
       <a href="{{ url_for('doctor_panel') }}"
          class="nav-link {% if request.endpoint == 'doctor_panel' %}active{% endif %}">
@@ -664,6 +671,11 @@
        class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">◈ Profile</a>
     <a href="{{ url_for('qr_page') }}"
        class="nav-link {% if request.endpoint == 'qr_page' %}active{% endif %}">▣ QR Code</a>
+    <!-- Reports link in mobile menu - only for non-doctors -->
+    {% if session.get('role') != 'doctor' %}
+    <a href="{{ url_for('reports') }}"
+       class="nav-link {% if request.endpoint == 'reports' %}active{% endif %}">📁 Reports</a>
+    {% endif %}
     {% if session.get('role') == 'doctor' %}
     <a href="{{ url_for('doctor_panel') }}"
        class="nav-link {% if request.endpoint == 'doctor_panel' %}active{% endif %}">⊕ Doctor Panel</a>

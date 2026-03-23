@@ -44,6 +44,81 @@
   }
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
 
+  /* ── SUMMARY AND REPORTS ROW ─────────────────────────────────────── */
+  .summary-reports-row {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1.25rem; margin-bottom:1.75rem;
+  }
+  .summary-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1.5rem;
+    position:relative; overflow:hidden;
+  }
+  .summary-card::before {
+    content:''; position:absolute; top:0;left:0;right:0; height:2px;
+    background:linear-gradient(90deg,var(--info),transparent);
+  }
+  .summary-header {
+    display:flex; align-items:center; gap:0.6rem;
+    margin-bottom:1.25rem;
+  }
+  .summary-icon {
+    width:32px; height:32px; background:rgba(59,130,246,0.12);
+    border-radius:var(--r-sm); display:flex; align-items:center;
+    justify-content:center; font-size:1rem;
+  }
+  .summary-title {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.13em; text-transform:uppercase; color:var(--text-muted);
+  }
+  .summary-content {
+    background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.2);
+    border-radius:10px; padding:1rem; line-height:1.7; font-size:0.93rem;
+    margin-bottom:1rem;
+  }
+  .reports-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1.5rem;
+    position:relative; overflow:hidden;
+  }
+  .reports-card::before {
+    content:''; position:absolute; top:0;left:0;right:0; height:2px;
+    background:linear-gradient(90deg,var(--teal),transparent);
+  }
+  .reports-header {
+    display:flex; align-items:center; gap:0.6rem;
+    margin-bottom:1.25rem;
+  }
+  .reports-icon {
+    width:32px; height:32px; background:rgba(116,214,219,0.1);
+    border-radius:var(--r-sm); display:flex; align-items:center;
+    justify-content:center; font-size:1rem;
+  }
+  .reports-title {
+    font-family:var(--font-head); font-size:0.72rem; font-weight:700;
+    letter-spacing:0.13em; text-transform:uppercase; color:var(--text-muted);
+  }
+  .report-item {
+    display:flex; align-items:center; gap:0.75rem;
+    background:var(--bg3); border-radius:8px;
+    padding:0.6rem 0.9rem; margin-bottom:0.5rem;
+  }
+  .report-item:last-child { margin-bottom:0; }
+  .report-icon { font-size:1rem; flex-shrink:0; }
+  .report-info { flex:1; min-width:0; }
+  .report-name {
+    font-size:0.88rem; font-weight:500;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .report-category {
+    font-size:0.75rem; color:var(--text-muted);
+  }
+  .report-link {
+    color:var(--text-muted); font-size:0.8rem;
+    text-decoration:none; flex-shrink:0;
+  }
+  .report-link:hover { color:var(--red); }
+
   /* ── STAT CARDS ────────────────────────────────────────────── */
   .stat-row {
     display:grid; grid-template-columns:repeat(4,1fr);
@@ -278,11 +353,13 @@
   .qn-sub { font-size:0.73rem; color:var(--text-muted); }
 
   /* Responsive */
-  @media(max-width:1024px){ .stat-row { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:1024px){ .stat-row { grid-template-columns:repeat(2,1fr); }
+  .summary-reports-row { grid-template-columns:1fr; } }
   @media(max-width:768px){
     .charts-row, .tables-row { grid-template-columns:1fr; }
     .quick-nav { grid-template-columns:1fr; }
     .reading-grid { grid-template-columns:1fr 1fr; }
+    .summary-reports-row { grid-template-columns:1fr; }
   }
   @media(max-width:480px){
     .stat-row { grid-template-columns:1fr 1fr; }
@@ -339,14 +416,64 @@
     </div>
   </a>
   {% else %}
-  <div class="qn-card" style="opacity:0.45;cursor:default;" id="qn-insights">
-    <div class="qn-icon" style="background:rgba(245,158,11,0.1);">📊</div>
+  <a href="{{ url_for('reports') }}" class="qn-card" id="qn-reports">
+    <div class="qn-icon" style="background:rgba(116,214,219,0.1);">📁</div>
     <div>
-      <div class="qn-title">Health Insights</div>
-      <div class="qn-sub">Track readings over time</div>
+      <div class="qn-title">Medical Reports</div>
+      <div class="qn-sub">Upload &amp; manage documents</div>
     </div>
-  </div>
+  </a>
   {% endif %}
+</div>
+
+<!-- ── Medical Summary & Recent Reports Row ───────────────────────── -->
+<div class="summary-reports-row">
+  <!-- Medical Summary Card -->
+  <div class="summary-card">
+    <div class="summary-header">
+      <div class="summary-icon">🤖</div>
+      <div class="summary-title">AI Medical Summary</div>
+    </div>
+    {% if user.medical_summary %}
+    <div class="summary-content">
+      {{ user.medical_summary }}
+    </div>
+    {% else %}
+    <div style="background:var(--bg3);border-radius:10px;padding:1rem;color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">
+      No summary yet. Complete your profile and add health readings to generate one.
+    </div>
+    {% endif %}
+    <button onclick="refreshSummary()" class="btn btn-ghost" style="font-size:0.82rem;width:100%;">🔄 Refresh Summary</button>
+    <div id="summaryStatus" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.4rem;text-align:center;"></div>
+  </div>
+
+  <!-- Recent Reports Card -->
+  <div class="reports-card">
+    <div class="reports-header">
+      <div class="reports-icon">📁</div>
+      <div class="reports-title">Recent Medical Reports</div>
+    </div>
+    {% if recent_reports %}
+    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+      {% for r in recent_reports %}
+      <div class="report-item">
+        <span class="report-icon">{% if r.file_type == 'pdf' %}📄{% else %}🖼️{% endif %}</span>
+        <div class="report-info">
+          <div class="report-name">{{ r.original_name }}</div>
+          <div class="report-category">{{ r.category }}</div>
+        </div>
+        <a href="{{ url_for('view_report', report_id=r.id) }}" target="_blank" class="report-link">View →</a>
+      </div>
+      {% endfor %}
+    </div>
+    <a href="{{ url_for('reports') }}" class="btn btn-ghost mt-2" style="font-size:0.82rem;width:100%;text-align:center;">📁 All Reports →</a>
+    {% else %}
+    <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;text-align:center;">
+      No reports uploaded yet.
+    </div>
+    <a href="{{ url_for('reports') }}" class="btn btn-primary" style="font-size:0.85rem;width:100%;text-align:center;">⬆️ Upload First Report</a>
+    {% endif %}
+  </div>
 </div>
 
 <!-- ── Stat Cards ─────────────────────────────────────────────────── -->
@@ -559,6 +686,18 @@
 <script>
   // Set nav user
   setNavUser('{{ user.name | e }}', '{{ user.role | upper }}');
+
+  // Refresh summary function
+  async function refreshSummary() {
+    const statusDiv = document.getElementById('summaryStatus');
+    if (statusDiv) {
+      statusDiv.textContent = 'Refreshing...';
+      const res = await fetch('/api/summary');
+      const data = await res.json();
+      statusDiv.textContent = '✓ Summary updated!';
+      setTimeout(() => location.reload(), 800);
+    }
+  }
 
   // Type toggle
   function selectType(type) {
