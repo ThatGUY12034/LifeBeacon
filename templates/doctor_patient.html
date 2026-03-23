@@ -137,7 +137,145 @@
     font-weight: 700;
   }
 
-  /* ── UPLOAD CARD (IMPROVED - MATCHES DASHBOARD STYLE) ────────────────── */
+  /* ── INFO CARDS (DOCTOR & DIAGNOSIS) ───────────────────────────────── */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  .info-diagnosis-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    border-left: 3px solid var(--red);
+  }
+  .info-doctor-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    border-left: 3px solid var(--info);
+  }
+  .info-card-header {
+    padding: 1rem 1.35rem;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .info-card-header-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+  .info-card-body {
+    padding: 1.25rem;
+  }
+  .diagnosis-text {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .diagnosis-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .doctor-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .doctor-specialty {
+    font-size: 0.8rem;
+    color: var(--info);
+    margin-bottom: 0.75rem;
+  }
+  .doctor-contact {
+    margin-top: 0.5rem;
+  }
+  .doctor-phone {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--success);
+    margin: 0.5rem 0;
+  }
+  .doctor-email {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .call-doctor-btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    background: linear-gradient(135deg, var(--info), #2563eb);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-sm);
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .call-doctor-btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  }
+  .severity-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .severity-critical {
+    background: rgba(232, 23, 58, 0.2);
+    color: var(--red);
+    border: 1px solid rgba(232, 23, 58, 0.3);
+  }
+  .severity-moderate {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+  .severity-mild {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--info);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+  }
+  .severity-normal {
+    background: rgba(0, 229, 160, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(0, 229, 160, 0.2);
+  }
+
+  /* ── UPLOAD CARD ──────────────────────────────────────────────────── */
   .upload-card {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -256,7 +394,7 @@
     font-size: 0.75rem;
   }
 
-  /* Severity Select with Visual Indicators */
+  /* Severity Select */
   .severity-select {
     background: var(--bg3);
     border: 1px solid var(--border);
@@ -273,20 +411,8 @@
     border-color: var(--red);
     outline: none;
   }
-  .severity-option-critical {
-    color: var(--red);
-    font-weight: 600;
-  }
-  .severity-option-moderate {
-    color: var(--warning);
-    font-weight: 600;
-  }
-  .severity-option-mild {
-    color: var(--info);
-    font-weight: 600;
-  }
 
-  /* ── REPORTS SECTION ───────────────────────────────────────── */
+  /* ── REPORTS SECTION ──────────────────────────────────────────────── */
   .reports-section {
     margin-bottom: 1.75rem;
   }
@@ -357,7 +483,7 @@
     border-radius: var(--r-md);
     border-left: 3px solid var(--teal);
   }
-  .diagnosis-text {
+  .diagnosis-text-small {
     font-size: 0.88rem;
     line-height: 1.5;
     margin-bottom: 0.25rem;
@@ -391,6 +517,11 @@
     background: rgba(59, 130, 246, 0.12);
     color: var(--info);
     border: 1px solid rgba(59, 130, 246, 0.25);
+  }
+  .badge-dim {
+    background: rgba(50, 52, 62, 1);
+    color: var(--muted);
+    border: 1px solid var(--border);
   }
 
   /* Buttons */
@@ -716,7 +847,8 @@
   @media (max-width: 900px) {
     .charts-row,
     .tables-row,
-    .med-info-grid {
+    .med-info-grid,
+    .info-row {
       grid-template-columns: 1fr;
     }
     .pb-meta {
@@ -790,7 +922,61 @@
   </div>
 </div>
 
-<!-- ── UPLOAD CARD (IMPROVED) ─────────────────────────────────────────── -->
+<!-- ── LATEST DIAGNOSIS & DOCTOR INFO (NEW SECTION) ─────────────────────── -->
+<div class="info-row">
+  <!-- Latest Diagnosis Card -->
+  <div class="info-diagnosis-card">
+    <div class="info-card-header">
+      <div class="info-card-header-icon" style="background: rgba(232,23,58,0.12);">📋</div>
+      Latest Diagnosis
+    </div>
+    <div class="info-card-body">
+      {% if patient.last_diagnosis %}
+      <div class="diagnosis-text">{{ patient.last_diagnosis }}</div>
+      <div class="diagnosis-meta">
+        <span>📅 {{ patient.last_diagnosis_date.strftime('%B %d, %Y') if patient.last_diagnosis_date else 'Recent' }}</span>
+        {% if patient.current_condition_status %}
+        <span class="severity-badge severity-{{ patient.current_condition_status }}">
+          {{ patient.current_condition_status|upper }}
+        </span>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="ic-na">No recent diagnosis on record. Upload a report with diagnosis above.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Primary Care Physician Card -->
+  <div class="info-doctor-card">
+    <div class="info-card-header">
+      <div class="info-card-header-icon" style="background: rgba(59,130,246,0.12);">👨‍⚕️</div>
+      Primary Care Physician
+    </div>
+    <div class="info-card-body">
+      {% if patient.doctor_name %}
+      <div class="doctor-name">{{ patient.doctor_name }}</div>
+      {% if patient.doctor_specialty %}
+      <div class="doctor-specialty">{{ patient.doctor_specialty }}</div>
+      {% endif %}
+      {% if patient.doctor_phone %}
+      <div class="doctor-contact">
+        <div class="doctor-phone">📞 {{ patient.doctor_phone }}</div>
+        <a href="tel:{{ patient.doctor_phone }}" class="call-doctor-btn-sm">Call Doctor</a>
+      </div>
+      {% endif %}
+      {% if patient.doctor_email %}
+      <div class="doctor-email">✉️ {{ patient.doctor_email }}</div>
+      {% endif %}
+      {% else %}
+      <div class="ic-na">No primary care physician on file.</div>
+      <div class="text-muted text-sm mt-1">Patient can add doctor info in their profile.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ── UPLOAD CARD ─────────────────────────────────────────────────────── -->
 <div class="upload-card">
   <div class="upload-header">
     <div class="upload-header-icon">📋</div>
@@ -887,7 +1073,7 @@
       {% if r.diagnosis %}
       <div class="diagnosis-box">
         <div class="diagnosis-label">📋 Diagnosis</div>
-        <div class="diagnosis-text">{{ r.diagnosis }}</div>
+        <div class="diagnosis-text-small">{{ r.diagnosis }}</div>
       </div>
       {% endif %}
       
@@ -1001,8 +1187,8 @@
       <tbody>
         {% for r in readings_bp[:10] %}
         <tr>
-          <td><span class="chip chip-bp">{{ r.value1 | int }}</span></td>
-          <td><span class="chip chip-bp">{{ r.value2 | int }}</span></td>
+          <td><span class="chip chip-bp">{{ r.value1 | int }}</span></span></td>
+          <td><span class="chip chip-bp">{{ r.value2 | int }}</span></span></td>
           <td style="color: var(--text-muted); font-size: 0.78rem;">{{ r.timestamp.strftime('%b %d, %H:%M') if r.timestamp }}</td>
           <td style="color: var(--text-muted); font-size: 0.78rem;">{{ r.notes or '—' }}</td>
         </tr>

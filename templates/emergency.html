@@ -190,6 +190,156 @@
       color:var(--dim); font-weight:600; letter-spacing:0.08em;
     }
 
+    /* ── DOCTOR CARD (NEW) ─────────────────────────────────────────── */
+    .doctor-card {
+      background:linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.02) 100%);
+      border:2px solid rgba(59,130,246,0.35);
+      border-radius:8px;
+      padding:1.5rem;
+      margin-bottom:1.5rem;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 0 24px rgba(59,130,246,0.12);
+    }
+    .doctor-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--info), transparent);
+    }
+    .doctor-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-hd);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--info);
+      margin-bottom: 1.1rem;
+    }
+    .doctor-name {
+      font-family: var(--font-hud);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .doctor-specialty {
+      font-size: 0.8rem;
+      color: var(--info);
+      margin-bottom: 0.75rem;
+    }
+    .doctor-contact {
+      margin-top: 0.75rem;
+    }
+    .doctor-phone {
+      font-family: var(--font-hud);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--success);
+      margin: 0.5rem 0;
+    }
+    .call-doctor-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      background: linear-gradient(135deg, var(--info), #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-sm);
+      font-family: var(--font-hd);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .call-doctor-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+    }
+
+    /* ── LATEST DIAGNOSIS CARD (NEW) ───────────────────────────────── */
+    .diagnosis-card {
+      background:var(--bg2);
+      border:2px solid var(--red);
+      border-radius:8px;
+      padding:1.5rem;
+      margin-bottom:1.5rem;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 0 24px var(--red-glow);
+    }
+    .diagnosis-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red), transparent);
+    }
+    .diagnosis-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-hd);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1rem;
+    }
+    .diagnosis-text {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+    .diagnosis-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .severity-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .severity-critical {
+      background: rgba(232,23,58,0.2);
+      color: var(--red);
+      border: 1px solid rgba(232,23,58,0.3);
+    }
+    .severity-moderate {
+      background: rgba(245,158,11,0.15);
+      color: var(--warning);
+      border: 1px solid rgba(245,158,11,0.25);
+    }
+    .severity-mild {
+      background: rgba(59,130,246,0.12);
+      color: var(--info);
+      border: 1px solid rgba(59,130,246,0.25);
+    }
+    .severity-normal {
+      background: rgba(0,229,160,0.1);
+      color: var(--success);
+      border: 1px solid rgba(0,229,160,0.2);
+    }
+
     /* ── EMERGENCY PHONE ──────────────────────────────────────────── */
     .phone-card {
       background:var(--bg2); border:2px solid rgba(245,158,11,0.4);
@@ -285,13 +435,6 @@
       line-height: 1.7;
       color: var(--text);
     }
-    .summary-critical {
-      color: var(--red);
-      font-weight: 600;
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid rgba(232,23,58,0.3);
-    }
 
     /* ── INFO SECTIONS ──────────────────────────────────────────────── */
     .info-grid {
@@ -336,11 +479,6 @@
       color:var(--dim); font-size:0.82rem; font-style:italic;
     }
 
-    /* Text list */
-    .info-text {
-      font-size:0.88rem; color:var(--text); line-height:1.7;
-    }
-
     /* ── FOOTER ─────────────────────────────────────────────────────── */
     .emrg-footer {
       background:var(--bg2); border-top:1px solid var(--border);
@@ -365,6 +503,7 @@
       .info-card.full { grid-column:auto; }
       .phone-row { flex-direction:column; align-items:flex-start; }
       .call-btn { width:100%; height:54px; flex-direction:row; border-radius:6px; }
+      .call-doctor-btn { width:100%; justify-content:center; }
       .patient-header { flex-direction:column; text-align:center; }
       .patient-badges { justify-content:center; }
     }
@@ -424,6 +563,61 @@
       <div class="blood-na">Not on record — verify with standard typing</div>
       {% endif %}
     </div>
+
+    <!-- LATEST DIAGNOSIS CARD (NEW) -->
+    {% if latest_diagnosis %}
+    <div class="diagnosis-card">
+      <div class="diagnosis-header">
+        <span>📋</span> Latest Medical Diagnosis
+      </div>
+      <div class="diagnosis-text">
+        {{ latest_diagnosis.diagnosis }}
+      </div>
+      <div class="diagnosis-meta">
+        <span>👨‍⚕️ Dr. {{ latest_diagnosis.doctor_name or 'Unknown' }}</span>
+        <span>📅 {{ latest_diagnosis.date.strftime('%B %d, %Y') if latest_diagnosis.date else 'Recent' }}</span>
+        {% if latest_diagnosis.severity %}
+        <span class="severity-badge severity-{{ latest_diagnosis.severity }}">
+          {{ latest_diagnosis.severity|upper }}
+        </span>
+        {% endif %}
+      </div>
+      {% if latest_diagnosis.notes %}
+      <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted);">
+        📝 {{ latest_diagnosis.notes }}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- PRIMARY CARE PHYSICIAN CARD (NEW) -->
+    {% if user.doctor_name %}
+    <div class="doctor-card">
+      <div class="doctor-header">
+        <span>👨‍⚕️</span> Primary Care Physician
+      </div>
+      <div class="doctor-name">{{ user.doctor_name }}</div>
+      {% if user.doctor_specialty %}
+      <div class="doctor-specialty">{{ user.doctor_specialty }}</div>
+      {% endif %}
+      {% if user.doctor_phone %}
+      <div class="doctor-contact">
+        <div class="doctor-phone">{{ user.doctor_phone }}</div>
+        <a href="tel:{{ user.doctor_phone }}" class="call-doctor-btn">
+          📞 Call Doctor Now
+        </a>
+      </div>
+      {% endif %}
+      {% if user.doctor_email %}
+      <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+        ✉️ {{ user.doctor_email }}
+      </div>
+      {% endif %}
+      <div style="margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 0.75rem;">
+        💡 Contact doctor for complete medical history and treatment plan
+      </div>
+    </div>
+    {% endif %}
 
     <!-- AI Medical Summary Card -->
     <div class="summary-card">

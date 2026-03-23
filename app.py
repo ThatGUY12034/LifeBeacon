@@ -53,7 +53,11 @@ def init_db():
             primary_doctor_id INTEGER,
             last_diagnosis TEXT,
             last_diagnosis_date TIMESTAMP,
-            current_condition_status TEXT DEFAULT 'stable'
+            current_condition_status TEXT DEFAULT 'stable',
+            doctor_name TEXT,
+            doctor_phone TEXT,
+            doctor_email TEXT,
+            doctor_specialty TEXT
         );
         
         CREATE TABLE IF NOT EXISTS health_readings (
@@ -89,6 +93,10 @@ def init_db():
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_diagnosis TEXT;")
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_diagnosis_date TIMESTAMP;")
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS current_condition_status TEXT DEFAULT 'stable';")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS doctor_name TEXT;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS doctor_phone TEXT;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS doctor_email TEXT;")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS doctor_specialty TEXT;")
         cur.execute("ALTER TABLE medical_reports ADD COLUMN IF NOT EXISTS doctor_id INTEGER;")
         cur.execute("ALTER TABLE medical_reports ADD COLUMN IF NOT EXISTS diagnosis TEXT;")
         cur.execute("ALTER TABLE medical_reports ADD COLUMN IF NOT EXISTS severity TEXT DEFAULT 'normal';")
@@ -158,6 +166,14 @@ def generate_summary(user, readings_bp=None, readings_sugar=None):
 
     if user.get('medications'):
         parts.append(f"Currently on: {user['medications'].strip()}.")
+
+    # Add latest diagnosis if available
+    if user.get('last_diagnosis'):
+        parts.append(f"Latest diagnosis: {user['last_diagnosis']}.")
+        if user.get('current_condition_status') == 'critical':
+            parts.append("⚠️ CRITICAL CONDITION - Requires immediate medical attention.")
+        elif user.get('current_condition_status') == 'moderate':
+            parts.append("⚠️ Condition requires monitoring and follow-up.")
 
     urgent = False
 
@@ -298,18 +314,38 @@ def profile():
         conn = get_db()
         cur = conn.cursor()
         cur.execute("""
-            UPDATE users SET dob=%s,blood_group=%s,allergies=%s,chronic_conditions=%s,
-            medications=%s,emergency_contact_name=%s,emergency_contact_phone=%s,
-            emergency_contact_relation=%s WHERE id=%s
+            UPDATE users SET 
+                dob=%s,
+                blood_group=%s,
+                allergies=%s,
+                chronic_conditions=%s,
+                medications=%s,
+                emergency_contact_name=%s,
+                emergency_contact_phone=%s,
+                emergency_contact_relation=%s,
+                doctor_name=%s,
+                doctor_phone=%s,
+                doctor_email=%s,
+                doctor_specialty=%s
+            WHERE id=%s
         """, (
-            request.form.get('dob'), request.form.get('blood_group'),
-            request.form.get('allergies'), request.form.get('chronic_conditions'),
-            request.form.get('medications'), request.form.get('emergency_contact_name'),
-            request.form.get('emergency_contact_phone'), request.form.get('emergency_contact_relation'),
+            request.form.get('dob'),
+            request.form.get('blood_group'),
+            request.form.get('allergies'),
+            request.form.get('chronic_conditions'),
+            request.form.get('medications'),
+            request.form.get('emergency_contact_name'),
+            request.form.get('emergency_contact_phone'),
+            request.form.get('emergency_contact_relation'),
+            request.form.get('doctor_name'),
+            request.form.get('doctor_phone'),
+            request.form.get('doctor_email'),
+            request.form.get('doctor_specialty'),
             user['id']
         ))
         conn.commit()
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
         refresh_summary(user['id'])
         return redirect(url_for('dashboard'))
     return render_template('profile.html', user=user)
@@ -385,11 +421,31 @@ def emergency_view(token):
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute("SELECT * FROM users WHERE qr_token=%s", (token,))
     user = cur.fetchone()
-    cur.close(); conn.close()
+    
     if not user:
         return "Invalid QR code.", 404
+    
+    # Get latest diagnosis from medical reports
+    cur.execute("""
+        SELECT mr.diagnosis, mr.severity, mr.notes, mr.uploaded_at as date, u.name as doctor_name
+        FROM medical_reports mr
+        LEFT JOIN users u ON mr.doctor_id = u.id
+        WHERE mr.user_id = %s AND mr.diagnosis IS NOT NULL AND mr.diagnosis != ''
+        ORDER BY mr.uploaded_at DESC
+        LIMIT 1
+    """, (user['id'],))
+    latest_diagnosis = cur.fetchone()
+    
+    # Get medical summary
     summary = user.get('medical_summary') or refresh_summary(user['id'])
-    return render_template('emergency.html', user=user, summary=summary)
+    
+    cur.close()
+    conn.close()
+    
+    return render_template('emergency.html', 
+                         user=user, 
+                         summary=summary,
+                         latest_diagnosis=latest_diagnosis)
 
 # ─── MEDICAL REPORTS ──────────────────────────────────────────────────────────
 
@@ -498,7 +554,8 @@ def doctor_search():
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute(
-        """SELECT id, name, email, blood_group, current_condition_status 
+        """SELECT id, name, email, blood_group, current_condition_status,
+                  doctor_name, doctor_phone, last_diagnosis, last_diagnosis_date
            FROM users 
            WHERE role='patient' AND (name ILIKE %s OR email ILIKE %s) 
            LIMIT 10""",
@@ -550,16 +607,29 @@ def doctor_patient_view(pid):
                 """, (pid, filename, file.filename, psycopg2.Binary(file_data), 
                       ext, category, notes, user['id'], diagnosis, severity))
                 
-                # Update patient's last diagnosis and condition
+                # Update patient's last diagnosis, condition, and doctor info
                 if diagnosis:
                     cur2.execute("""
                         UPDATE users 
                         SET last_diagnosis = %s, 
                             last_diagnosis_date = NOW(),
                             current_condition_status = %s,
-                            primary_doctor_id = %s
+                            primary_doctor_id = %s,
+                            doctor_name = COALESCE(doctor_name, %s),
+                            doctor_phone = COALESCE(doctor_phone, %s),
+                            doctor_email = COALESCE(doctor_email, %s),
+                            doctor_specialty = COALESCE(doctor_specialty, %s)
                         WHERE id = %s
-                    """, (diagnosis, severity, user['id'], pid))
+                    """, (
+                        diagnosis, 
+                        severity, 
+                        user['id'],
+                        user['name'],
+                        user.get('phone', ''),
+                        user.get('email', ''),
+                        user.get('specialty', ''),
+                        pid
+                    ))
                 
                 conn.commit()
                 cur2.close()

@@ -113,6 +113,7 @@
   .fsec-medical::before  { background:linear-gradient(90deg,var(--red),transparent 60%); }
   .fsec-contact::before  { background:linear-gradient(90deg,var(--warning),transparent 60%); }
   .fsec-identity::before { background:linear-gradient(90deg,var(--teal),transparent 60%); }
+  .fsec-doctor::before   { background:linear-gradient(90deg,var(--info),transparent 60%); }
 
   .fsec-head {
     display:flex; align-items:center; gap:0.75rem;
@@ -353,6 +354,60 @@
                 {% endfor %}
               </select>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Care Physician (NEW SECTION) -->
+      <div class="form-section fsec-doctor">
+        <div class="fsec-head">
+          <div class="fsec-icon" style="background:rgba(59,130,246,0.12);">👨‍⚕️</div>
+          <div>
+            <div class="fsec-title">Primary Care Physician</div>
+            <div class="fsec-sub">Your doctor's contact information — visible on emergency QR</div>
+          </div>
+        </div>
+        <div class="fsec-body">
+          <div class="field-grid-2">
+            <div class="form-field">
+              <label class="form-label" for="doctor_name">Doctor's Name</label>
+              <input type="text" name="doctor_name" id="doctor_name" class="form-input"
+                     placeholder="Dr. Sarah Johnson"
+                     value="{{ user.doctor_name or '' }}"/>
+              <div class="form-hint">Full name with title (Dr., Prof., etc.)</div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="doctor_phone">Phone Number</label>
+              <input type="tel" name="doctor_phone" id="doctor_phone" class="form-input"
+                     placeholder="+1 (555) 123-4567"
+                     value="{{ user.doctor_phone or '' }}"/>
+              <div class="form-hint">Emergency contact number for the doctor</div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="doctor_email">Email Address</label>
+              <input type="email" name="doctor_email" id="doctor_email" class="form-input"
+                     placeholder="doctor@hospital.com"
+                     value="{{ user.doctor_email or '' }}"/>
+              <div class="form-hint">For non-emergency correspondence</div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="doctor_specialty">Specialty</label>
+              <select name="doctor_specialty" id="doctor_specialty" class="form-select">
+                <option value="">— Select Specialty —</option>
+                {% set specialties = ['Cardiology', 'Internal Medicine', 'Family Medicine', 'Pediatrics', 
+                                      'Endocrinology', 'Neurology', 'Orthopedics', 'Gastroenterology',
+                                      'Pulmonology', 'Nephrology', 'Oncology', 'Rheumatology',
+                                      'Dermatology', 'Psychiatry', 'Other'] %}
+                {% for spec in specialties %}
+                <option value="{{ spec }}" {{ 'selected' if user.doctor_specialty == spec }}>{{ spec }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-hint">Doctor's area of expertise</div>
+            </div>
+          </div>
+          <div class="form-hint" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+            💡 <strong>Important:</strong> This information will be visible on your emergency QR code. 
+            First responders can contact your doctor directly for critical medical information.
           </div>
         </div>
       </div>
