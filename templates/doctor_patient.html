@@ -77,7 +77,158 @@
     font-family:var(--font-head); font-size:0.92rem; font-weight:700;
   }
 
-  /* ── EMERGENCY CONTACT CARD ─────────────────────────────────────── */
+  /* ── UPLOAD REPORT CARD (NEW) ────────────────────────────────────── */
+  .upload-card {
+    background:linear-gradient(135deg, rgba(59,130,246,0.05), rgba(59,130,246,0.01));
+    border:2px solid rgba(59,130,246,0.3);
+    border-radius:var(--r-lg);
+    margin-bottom:1.75rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .upload-card::before {
+    content:''; position:absolute; top:0;left:0;right:0;
+    height:2px;
+    background:linear-gradient(90deg,var(--info),transparent);
+  }
+  .upload-header {
+    padding:1rem 1.5rem;
+    background:var(--bg4);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:0.75rem;
+  }
+  .upload-header-icon {
+    width:32px; height:32px;
+    background:rgba(59,130,246,0.12);
+    border-radius:var(--r-sm);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1rem;
+  }
+  .upload-header-title {
+    font-family:var(--font-head);
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.13em;
+    text-transform:uppercase;
+    color:var(--info);
+  }
+  .upload-body {
+    padding:1.5rem;
+  }
+
+  /* ── SEVERITY SELECTOR ───────────────────────────────────────────── */
+  .severity-select {
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:var(--r-sm);
+    padding:0.6rem;
+    color:var(--text);
+    font-family:var(--font-body);
+    font-size:0.9rem;
+    width:100%;
+    cursor:pointer;
+  }
+  .severity-select:focus {
+    border-color:var(--red);
+    outline:none;
+  }
+  .severity-critical {
+    border-left: 4px solid var(--red);
+    padding-left: 0.75rem;
+  }
+  .severity-moderate {
+    border-left: 4px solid var(--warning);
+    padding-left: 0.75rem;
+  }
+  .severity-mild {
+    border-left: 4px solid var(--info);
+    padding-left: 0.75rem;
+  }
+  .severity-normal {
+    border-left: 4px solid var(--success);
+    padding-left: 0.75rem;
+  }
+
+  /* ── REPORTS SECTION (NEW) ───────────────────────────────────────── */
+  .reports-section {
+    margin-bottom:1.75rem;
+  }
+  .reports-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:1rem;
+    flex-wrap:wrap;
+    gap:0.75rem;
+  }
+  .reports-title {
+    font-family:var(--font-head);
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.13em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+  .report-item {
+    background:var(--bg3);
+    border-radius:var(--r-md);
+    padding:1rem;
+    margin-bottom:0.75rem;
+    transition:all 0.2s;
+  }
+  .report-item:hover {
+    background:var(--bg4);
+    transform:translateX(4px);
+  }
+  .report-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:start;
+    margin-bottom:0.5rem;
+    flex-wrap:wrap;
+    gap:0.5rem;
+  }
+  .report-name {
+    font-weight:600;
+    font-size:0.95rem;
+  }
+  .report-meta {
+    font-size:0.75rem;
+    color:var(--text-muted);
+    margin-top:0.25rem;
+  }
+  .doctor-badge {
+    background:rgba(59,130,246,0.1);
+    color:var(--info);
+    padding:0.2rem 0.5rem;
+    border-radius:var(--r-sm);
+    font-size:0.7rem;
+    display:inline-block;
+  }
+  .diagnosis-box {
+    margin-top:0.75rem;
+    padding:0.75rem;
+    background:var(--bg2);
+    border-radius:var(--r-sm);
+    border-left:3px solid var(--teal);
+  }
+  .diagnosis-text {
+    font-size:0.85rem;
+    margin-bottom:0.25rem;
+  }
+  .diagnosis-label {
+    font-size:0.7rem;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+
+  /* ── EXISTING STYLES CONTINUE ────────────────────────────────────── */
+  /* (Keep all your existing styles below this line) */
   .contact-card {
     background:var(--bg2); border:1px solid rgba(245,158,11,0.3);
     border-radius:var(--r-lg); overflow:hidden; margin-bottom:1.75rem;
@@ -120,7 +271,6 @@
   }
   .contact-call:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,229,160,0.35); }
 
-  /* ── CHARTS ROW ──────────────────────────────────────────────────── */
   .charts-row {
     display:grid; grid-template-columns:1fr 1fr;
     gap:1.25rem; margin-bottom:1.75rem;
@@ -141,7 +291,6 @@
   .chart-sub { font-size:0.76rem; color:var(--text-dim); margin-bottom:1.1rem; }
   .chart-wrap { height:180px; position:relative; }
 
-  /* ── MEDICAL INFO GRID ───────────────────────────────────────────── */
   .med-info-grid {
     display:grid; grid-template-columns:1fr 1fr;
     gap:1.25rem; margin-bottom:1.75rem;
@@ -170,7 +319,6 @@
   .tag-condition { background:rgba(245,158,11,0.1); color:var(--warning); border:1px solid rgba(245,158,11,0.22); }
   .tag-med       { background:rgba(116,214,219,0.08); color:var(--teal); border:1px solid rgba(116,214,219,0.2); }
 
-  /* ── READINGS TABLES ─────────────────────────────────────────────── */
   .tables-row {
     display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;
   }
@@ -252,7 +400,11 @@
         {% if patient.dob %}
         <span class="badge badge-dim">DOB: {{ patient.dob }}</span>
         {% endif %}
-        <span class="badge badge-teal">Patient</span>
+        {% if patient.current_condition_status %}
+        <span class="badge {% if patient.current_condition_status == 'critical' %}badge-red{% elif patient.current_condition_status == 'moderate' %}badge-orange{% else %}badge-green{% endif %}">
+          {% if patient.current_condition_status == 'critical' %}🚨 CRITICAL{% elif patient.current_condition_status == 'moderate' %}⚠️ MODERATE{% else %}✓ STABLE{% endif %}
+        </span>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -273,6 +425,120 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- ── DOCTOR UPLOAD CARD (NEW) ─────────────────────────────────────── -->
+<div class="upload-card">
+  <div class="upload-header">
+    <div class="upload-header-icon">📋</div>
+    <div class="upload-header-title">Add Medical Report & Diagnosis</div>
+  </div>
+  <div class="upload-body">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">Select File</label>
+          <input type="file" name="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
+          <div class="text-muted text-sm mt-1">PDF, PNG, JPG — max 5MB</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-control">
+            <option value="General">General</option>
+            <option value="Blood Pressure">Blood Pressure</option>
+            <option value="Diabetes / Sugar">Diabetes / Sugar</option>
+            <option value="Heart">Heart</option>
+            <option value="Kidney">Kidney</option>
+            <option value="Liver">Liver</option>
+            <option value="Thyroid">Thyroid</option>
+            <option value="X-Ray / Scan">X-Ray / Scan</option>
+            <option value="Prescription">Prescription</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Diagnosis</label>
+          <input type="text" name="diagnosis" class="form-control" 
+                 placeholder="e.g., Hypertension Stage 2, Type 2 Diabetes">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Severity</label>
+          <select name="severity" class="severity-select" id="severitySelect">
+            <option value="normal">📋 Normal/Routine</option>
+            <option value="mild">⚠️ Mild - Monitor</option>
+            <option value="moderate">⚠️ Moderate - Requires Attention</option>
+            <option value="critical">🚨 Critical - Immediate Action Required</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" name="notes" class="form-control" 
+                 placeholder="Additional notes for this report">
+        </div>
+      </div>
+      
+      <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+        📤 Upload Report & Update Patient Record
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ── REPORTS SECTION (NEW) ────────────────────────────────────────── -->
+<div class="reports-section">
+  <div class="reports-header">
+    <div class="reports-title">📁 Medical Reports & Diagnoses</div>
+    <span class="badge badge-info">{{ reports|length if reports else 0 }} Reports</span>
+  </div>
+  
+  {% if reports and reports|length > 0 %}
+    {% for r in reports %}
+    <div class="report-item">
+      <div class="report-header">
+        <div>
+          <div class="report-name">{{ r.original_name }}</div>
+          <div class="report-meta">
+            {{ r.category }} • {{ r.uploaded_at.strftime('%B %d, %Y at %I:%M %p') }}
+            {% if r.doctor_name %}
+            <span class="doctor-badge">👨‍⚕️ Dr. {{ r.doctor_name }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          {% if r.severity %}
+          <span class="badge {% if r.severity == 'critical' %}badge-red{% elif r.severity == 'moderate' %}badge-orange{% elif r.severity == 'mild' %}badge-info{% else %}badge-green{% endif %}">
+            {{ r.severity|upper }}
+          </span>
+          {% endif %}
+          <a href="{{ url_for('view_report', report_id=r.id) }}" target="_blank" 
+             class="btn btn-ghost btn-sm" style="margin-left: 0.5rem;">View →</a>
+        </div>
+      </div>
+      
+      {% if r.diagnosis %}
+      <div class="diagnosis-box">
+        <div class="diagnosis-label">📋 Diagnosis</div>
+        <div class="diagnosis-text">{{ r.diagnosis }}</div>
+      </div>
+      {% endif %}
+      
+      {% if r.notes %}
+      <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+        📝 {{ r.notes }}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="empty-state">
+    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📂</div>
+    No medical reports yet. Upload a report above to add diagnosis.
+  </div>
+  {% endif %}
 </div>
 
 <!-- Emergency Contact -->
@@ -412,6 +678,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
   setNavUser('{{ doctor.name | e }}', '{{ doctor.role | upper }}');
+
+  // Severity selector styling
+  const severitySelect = document.getElementById('severitySelect');
+  if (severitySelect) {
+    severitySelect.addEventListener('change', function() {
+      this.className = 'severity-select severity-' + this.value;
+    });
+    severitySelect.className = 'severity-select severity-' + severitySelect.value;
+  }
 
   const chartOpts = {
     responsive:true, maintainAspectRatio:false,

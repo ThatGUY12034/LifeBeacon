@@ -484,25 +484,102 @@ def doctor_search():
     cur.close(); conn.close()
     return jsonify([dict(r) for r in rows])
 
-@app.route('/doctor/patient/<int:pid>')
+@app.route('/doctor/patient/<int:pid>', methods=['GET', 'POST'])
 @login_required
 def doctor_patient_view(pid):
     user = current_user()
     if user['role'] != 'doctor':
         return redirect(url_for('dashboard'))
+    
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
+    # Get patient info
     cur.execute("SELECT * FROM users WHERE id=%s", (pid,))
     patient = cur.fetchone()
-    cur.execute("SELECT * FROM health_readings WHERE user_id=%s AND reading_type='bp' ORDER BY timestamp DESC LIMIT 20", (pid,))
-    readings_bp = cur.fetchall()
-    cur.execute("SELECT * FROM health_readings WHERE user_id=%s AND reading_type='sugar' ORDER BY timestamp DESC LIMIT 20", (pid,))
-    readings_sugar = cur.fetchall()
-    cur.close(); conn.close()
+    
     if not patient:
         return "Patient not found", 404
-    return render_template('doctor_patient.html', patient=patient,
-                           readings_bp=readings_bp, readings_sugar=readings_sugar, doctor=user)
+    
+    # Handle report upload from doctor
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return redirect(url_for('doctor_patient_view', pid=pid))
+        
+        file = request.files['file']
+        if file.filename and allowed_file(file.filename):
+            file_data = file.read()
+            if len(file_data) <= MAX_FILE_SIZE:
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secrets.token_hex(16) + '.' + ext
+                category = request.form.get('category', 'General')
+                notes = request.form.get('notes', '')
+                diagnosis = request.form.get('diagnosis', '')
+                severity = request.form.get('severity', 'normal')
+                
+                cur2 = conn.cursor()
+                cur2.execute("""
+                    INSERT INTO medical_reports 
+                    (user_id, filename, original_name, file_data, file_type, 
+                     category, notes, doctor_id, diagnosis, severity) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (pid, filename, file.filename, psycopg2.Binary(file_data), 
+                      ext, category, notes, user['id'], diagnosis, severity))
+                
+                # Update patient's last diagnosis
+                if diagnosis:
+                    cur2.execute("""
+                        UPDATE users 
+                        SET last_diagnosis = %s, 
+                            last_diagnosis_date = NOW(),
+                            current_condition_status = %s,
+                            primary_doctor_id = %s
+                        WHERE id = %s
+                    """, (diagnosis, severity, user['id'], pid))
+                
+                conn.commit()
+                cur2.close()
+                
+                # Refresh patient's summary
+                refresh_summary(pid)
+                
+                return redirect(url_for('doctor_patient_view', pid=pid))
+    
+    # Get patient data for display
+    cur.execute("""
+        SELECT * FROM health_readings 
+        WHERE user_id=%s AND reading_type='bp' 
+        ORDER BY timestamp DESC LIMIT 20
+    """, (pid,))
+    readings_bp = cur.fetchall()
+    
+    cur.execute("""
+        SELECT * FROM health_readings 
+        WHERE user_id=%s AND reading_type='sugar' 
+        ORDER BY timestamp DESC LIMIT 20
+    """, (pid,))
+    readings_sugar = cur.fetchall()
+    
+    # Get patient's reports
+    cur.execute("""
+        SELECT mr.*, u.name as doctor_name 
+        FROM medical_reports mr
+        LEFT JOIN users u ON mr.doctor_id = u.id
+        WHERE mr.user_id=%s 
+        ORDER BY mr.uploaded_at DESC
+    """, (pid,))
+    reports = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
+    return render_template('doctor_patient.html', 
+                         patient=patient,
+                         readings_bp=readings_bp, 
+                         readings_sugar=readings_sugar,
+                         reports=reports,
+                         doctor=user,
+                         categories=REPORT_CATEGORIES)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

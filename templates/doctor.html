@@ -131,7 +131,7 @@
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .rc-meta {
-    display:flex; align-items:center; gap:0.5rem; flex-shrink:0;
+    display:flex; align-items:center; gap:0.75rem; flex-shrink:0;
     flex-wrap:wrap; justify-content:flex-end;
   }
   .rc-blood {
@@ -139,6 +139,27 @@
     padding:0.2rem 0.55rem;
     background:rgba(232,23,58,0.12); color:var(--red-light);
     border:1px solid rgba(232,23,58,0.25); border-radius:3px;
+  }
+  .rc-status {
+    font-family:var(--font-head); font-size:0.7rem; font-weight:700;
+    padding:0.2rem 0.55rem;
+    border-radius:3px;
+    letter-spacing:0.05em;
+  }
+  .status-critical {
+    background:rgba(232,23,58,0.15);
+    color:var(--red);
+    border:1px solid rgba(232,23,58,0.3);
+  }
+  .status-moderate {
+    background:rgba(245,158,11,0.12);
+    color:var(--warning);
+    border:1px solid rgba(245,158,11,0.25);
+  }
+  .status-stable {
+    background:rgba(0,229,160,0.1);
+    color:var(--success);
+    border:1px solid rgba(0,229,160,0.2);
   }
   .rc-arrow {
     color:var(--text-dim); font-size:1rem; transition:transform 0.18s;
@@ -184,9 +205,17 @@
   }
   .dstat-sub { font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem; }
 
+  /* Quick actions */
+  .quick-actions {
+    margin-bottom:1.5rem;
+    display:flex;
+    gap:0.75rem;
+    flex-wrap:wrap;
+  }
+
   @media(max-width:640px){
     .doctor-stats { grid-template-columns:1fr 1fr; }
-    .rc-meta { display:none; }
+    .rc-meta { gap:0.5rem; }
   }
   @media(max-width:480px){
     .doctor-stats { grid-template-columns:1fr; }
@@ -209,6 +238,19 @@
   </div>
 </div>
 
+<!-- Quick Actions -->
+<div class="quick-actions">
+  <div class="badge badge-info" style="padding:0.4rem 0.9rem;">
+    📋 Upload reports & add diagnoses
+  </div>
+  <div class="badge badge-info" style="padding:0.4rem 0.9rem;">
+    🔍 View patient history
+  </div>
+  <div class="badge badge-info" style="padding:0.4rem 0.9rem;">
+    📊 Track health trends
+  </div>
+</div>
+
 <!-- Doctor stat cards -->
 <div class="doctor-stats" id="doctor-stats">
   <div class="dstat">
@@ -224,7 +266,7 @@
   <div class="dstat">
     <div class="dstat-label">Access Level</div>
     <div class="dstat-val">Doctor</div>
-    <div class="dstat-sub">Read-only patient profiles</div>
+    <div class="dstat-sub">View & upload reports</div>
   </div>
 </div>
 
@@ -245,7 +287,8 @@
   </div>
   <div class="search-hint">
     <span class="kbd">Type</span> to search in real-time &nbsp;·&nbsp;
-    <span class="kbd">↵</span> to open first result
+    <span class="kbd">↵</span> to open first result &nbsp;·&nbsp;
+    <span class="kbd">📋</span> Upload reports from patient view
   </div>
 </div>
 
@@ -308,6 +351,17 @@
     }
   }
 
+  function getStatusBadge(status) {
+    if (status === 'critical') {
+      return '<span class="rc-status status-critical">🚨 CRITICAL</span>';
+    } else if (status === 'moderate') {
+      return '<span class="rc-status status-moderate">⚠️ MODERATE</span>';
+    } else if (status === 'stable') {
+      return '<span class="rc-status status-stable">✓ STABLE</span>';
+    }
+    return '';
+  }
+
   function renderResults(patients, q) {
     if (!patients.length) {
       countBadge.textContent = '0 found';
@@ -331,6 +385,7 @@
 
     for (const p of patients) {
       const initials = p.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      const statusBadge = getStatusBadge(p.current_condition_status);
       html += `
         <a href="/doctor/patient/${p.id}" class="result-card" id="patient-${p.id}">
           <div class="rc-avatar">${escHtml(initials)}</div>
@@ -339,7 +394,8 @@
             <div class="rc-email">${escHtml(p.email)}</div>
           </div>
           <div class="rc-meta">
-            ${p.blood_group ? `<span class="rc-blood">${escHtml(p.blood_group)}</span>` : ''}
+            ${p.blood_group ? `<span class="rc-blood">🩸 ${escHtml(p.blood_group)}</span>` : ''}
+            ${statusBadge}
             <span class="rc-arrow">›</span>
           </div>
         </a>`;
