@@ -3,49 +3,293 @@
 
 {% block extra_head %}
 <style>
-  /* CATEGORY */
-  .category-link {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0.6rem 0.9rem;
-    border-radius:8px;
-    text-decoration:none;
+  /* ── PAGE HEADER ─────────────────────────────────────────────── */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.8rem;
+    letter-spacing: -0.03em;
+  }
+  .page-sub {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
   }
 
+  /* ── CARDS ───────────────────────────────────────────────────── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+  }
+  .card-accent {
+    border-color: rgba(232,23,58,0.3);
+  }
+  .card-accent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), transparent);
+  }
+  .card-title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-muted);
+  }
+  .card-title .icon {
+    width: 32px;
+    height: 32px;
+    background: var(--bg3);
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .mb-3 {
+    margin-bottom: 1.75rem;
+  }
+  .mt-2 {
+    margin-top: 1rem;
+  }
+  .mt-1 {
+    margin-top: 0.5rem;
+  }
+
+  /* ── GRID ────────────────────────────────────────────────────── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── FORM ────────────────────────────────────────────────────── */
+  .form-group {
+    margin-bottom: 1.1rem;
+  }
+  .form-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.45rem;
+    transition: color 0.18s;
+  }
+  .form-control {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .form-control:focus {
+    border-color: transparent;
+    border-bottom-color: var(--red);
+    background: var(--bg4);
+    box-shadow: 0 0 0 1px rgba(232,23,58,0.1), inset 0 -1px 0 var(--red);
+  }
+  select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.2rem;
+    cursor: pointer;
+  }
+  input[type="file"].form-control {
+    padding: 0.5rem 0.7rem;
+    background: var(--bg3);
+  }
+  input[type="file"].form-control::file-selector-button {
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.4rem 0.8rem;
+    color: var(--text);
+    cursor: pointer;
+    margin-right: 0.75rem;
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+  }
+
+  /* ── BUTTONS ─────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1.3rem;
+    border-radius: var(--r-sm);
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--grad-red);
+    color: #fff;
+    box-shadow: 0 4px 16px var(--red-glow);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px var(--red-glow-lg);
+  }
+  .btn-ghost {
+    background: var(--bg4);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: var(--border-hover);
+    background: var(--bg5);
+  }
+
+  /* ── CATEGORY LINKS ──────────────────────────────────────────── */
+  .category-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--r-sm);
+    text-decoration: none;
+    transition: all 0.18s ease;
+  }
   .category-active {
     background: var(--red);
     color: #fff;
   }
-
   .category-inactive {
     background: var(--bg3);
     color: var(--text);
   }
+  .category-inactive:hover {
+    background: var(--bg4);
+    color: var(--text);
+  }
+  .category-count {
+    background: rgba(255,255,255,0.2);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.75rem;
+  }
 
-  /* FILE ICON */
+  /* ── FILE ICONS ──────────────────────────────────────────────── */
   .file-icon {
-    width:42px;
-    height:42px;
-    border-radius:10px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.3rem;
-    flex-shrink:0;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
   }
-
   .file-pdf {
-    background: rgba(232,23,58,0.1);
+    background: rgba(232,23,58,0.12);
   }
-
   .file-img {
     background: rgba(59,130,246,0.1);
+  }
+
+  /* ── BADGES ──────────────────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.55rem;
+    border-radius: var(--r-xs);
+    font-size: 0.68rem;
+    font-family: var(--font-head);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .badge-blue {
+    background: rgba(59,130,246,0.12);
+    color: var(--info);
+    border: 1px solid rgba(59,130,246,0.25);
+  }
+
+  /* ── TEXT UTILITIES ──────────────────────────────────────────── */
+  .text-muted {
+    color: var(--text-muted);
+  }
+  .text-sm {
+    font-size: 0.85rem;
+  }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+  .flex {
+    display: flex;
+  }
+  .items-center {
+    align-items: center;
+  }
+  .gap-1 {
+    gap: 0.5rem;
+  }
+  .sticky-sidebar {
+    position: sticky;
+    top: 80px;
   }
 </style>
 {% endblock %}
 
 {% block content %}
+
+<!-- Page Header -->
 <div class="page-header">
   <div>
     <div class="page-title">📁 Medical Reports</div>
@@ -54,13 +298,15 @@
   <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">← Dashboard</a>
 </div>
 
-<!-- UPLOAD -->
+<!-- Upload Card -->
 <div class="card card-accent mb-3">
-  <div class="card-title"><div class="icon">⬆️</div> Upload New Report</div>
+  <div class="card-title">
+    <div class="icon">⬆️</div>
+    Upload New Report
+  </div>
 
   <form method="POST" action="{{ url_for('upload_report') }}" enctype="multipart/form-data">
     <div class="grid-3">
-
       <div class="form-group">
         <label class="form-label">Select File</label>
         <input type="file" name="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
@@ -78,9 +324,8 @@
 
       <div class="form-group">
         <label class="form-label">Notes</label>
-        <input type="text" name="notes" class="form-control">
+        <input type="text" name="notes" class="form-control" placeholder="e.g., Fasting blood test, Jan 2024">
       </div>
-
     </div>
 
     <button type="submit" class="btn btn-primary">⬆️ Upload Report</button>
@@ -89,106 +334,99 @@
 
 <div class="grid-2" style="align-items:start;">
 
-  <!-- SIDEBAR -->
-  <div class="card" style="position:sticky;top:80px;">
-    <div class="card-title"><div class="icon">🗂️</div> Categories</div>
+  <!-- Sidebar - Categories -->
+  <div class="card sticky-sidebar">
+    <div class="card-title">
+      <div class="icon">🗂️</div>
+      Categories
+    </div>
 
     <div style="display:flex;flex-direction:column;gap:0.4rem;">
-
-      <!-- ALL -->
+      <!-- All Reports -->
       <a href="{{ url_for('reports') }}"
          class="category-link {% if not active_category %}category-active{% else %}category-inactive{% endif %}">
         <span>All Reports</span>
-        <span style="font-size:0.8rem;">
+        <span class="category-count">
           {% if reports %}{{ reports|length }}{% else %}0{% endif %}
         </span>
       </a>
 
-      <!-- LOOP -->
+      <!-- Category Loop -->
       {% for cat in categories %}
       <a href="{{ url_for('reports', category=cat) }}"
          class="category-link {% if active_category == cat %}category-active{% else %}category-inactive{% endif %}">
-
         <span>{{ cat }}</span>
-
         {% if cat_counts and cat in cat_counts %}
-        <span style="background:rgba(255,255,255,0.2);
-                     border-radius:999px;
-                     padding:0.1rem 0.5rem;
-                     font-size:0.75rem;">
-          {{ cat_counts[cat] }}
-        </span>
+        <span class="category-count">{{ cat_counts[cat] }}</span>
         {% endif %}
-
       </a>
       {% endfor %}
     </div>
 
     <div class="divider"></div>
 
-    <div style="background:rgba(16,185,129,0.08);
-                border:1px solid rgba(16,185,129,0.2);
-                border-radius:10px;
+    <!-- Security Note -->
+    <div style="background:rgba(0,229,160,0.08);
+                border:1px solid rgba(0,229,160,0.2);
+                border-radius:var(--r-md);
                 padding:0.85rem;
                 font-size:0.82rem;
-                color:#34d399;">
-      🔒 Your reports are <strong>private</strong>.
+                color:var(--success);">
+      🔒 Your reports are <strong>private</strong>. They are never shown in the emergency QR view — only your medical summary is visible to responders.
     </div>
   </div>
 
-  <!-- REPORTS -->
+  <!-- Reports List -->
   <div>
-
     {% if reports and reports|length > 0 %}
-
     <div style="display:flex;flex-direction:column;gap:0.85rem;">
-
       {% for r in reports %}
       <div class="card" style="padding:1.25rem;">
-
         <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-
-          <!-- ICON -->
+          
+          <!-- File Icon -->
           <div class="file-icon {% if r.file_type == 'pdf' %}file-pdf{% else %}file-img{% endif %}">
             {% if r.file_type == 'pdf' %}📄{% else %}🖼️{% endif %}
           </div>
 
-          <!-- INFO -->
+          <!-- Report Info -->
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <div style="font-weight:600;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
               {{ r.original_name }}
             </div>
-
             <div style="display:flex;gap:0.5rem;margin-top:0.3rem;flex-wrap:wrap;">
               <span class="badge badge-blue">{{ r.category }}</span>
-
               <span class="text-muted text-sm">
                 {% if r.uploaded_at %}
                 {{ r.uploaded_at.strftime('%b %d, %Y') }}
                 {% endif %}
               </span>
-
               {% if r.notes %}
               <span class="text-muted text-sm">· {{ r.notes }}</span>
               {% endif %}
             </div>
           </div>
 
-          <!-- ACTIONS -->
+          <!-- Actions -->
           <div style="display:flex;gap:0.25rem;">
             <a href="{{ url_for('view_report', report_id=r.id) }}"
                target="_blank"
-               class="btn btn-ghost">
-              👁
+               class="btn btn-ghost"
+               style="padding:0.4rem 0.8rem;font-size:0.82rem;">
+              👁 View
             </a>
-
             <form method="POST"
                   action="{{ url_for('delete_report', report_id=r.id) }}"
-                  onsubmit="return confirm('Delete?')">
-
+                  onsubmit="return confirm('Delete this report?')"
+                  style="display:inline;">
               <button type="submit" class="btn"
-                      style="background:rgba(232,23,58,0.1);color:var(--red);">
-                🗑
+                      style="background:rgba(232,23,58,0.1);
+                             color:var(--red);
+                             border:1px solid rgba(232,23,58,0.3);
+                             padding:0.4rem 0.8rem;
+                             font-size:0.82rem;
+                             cursor:pointer;">
+                🗑 Delete
               </button>
             </form>
           </div>
@@ -196,18 +434,17 @@
         </div>
       </div>
       {% endfor %}
-
     </div>
-
     {% else %}
-
-    <div class="card" style="text-align:center;padding:3rem;">
-      <div style="font-size:3rem;">📂</div>
-      <div>No reports yet</div>
+    <div class="card" style="text-align:center;padding:3rem 2rem;">
+      <div style="font-size:3rem;margin-bottom:1rem;">📂</div>
+      <div style="font-weight:600;margin-bottom:0.5rem;">No reports yet</div>
+      <div class="text-muted text-sm">
+        {% if active_category %}No reports in "{{ active_category }}" category.
+        {% else %}Upload your first medical report using the form above.{% endif %}
+      </div>
     </div>
-
     {% endif %}
-
   </div>
 </div>
 
