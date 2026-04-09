@@ -1065,7 +1065,7 @@
             {{ r.severity|upper }}
           </span>
           {% endif %}
-          <a href="{{ url_for('view_report', report_id=r.id) }}" target="_blank" 
+          <a href="{{ url_for('doctor_view_report', report_id=r.id) }}" target="_blank" 
              class="btn btn-ghost btn-sm" style="margin-left: 0.5rem;">View →</a>
         </div>
       </div>

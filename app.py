@@ -523,6 +523,30 @@ def view_report(report_id):
         download_name=report['original_name']
     )
 
+@app.route('/doctor/reports/view/<int:report_id>')
+@login_required
+def doctor_view_report(report_id):
+    """Doctors can view any patient's report without the user_id ownership check."""
+    user = current_user()
+    if user['role'] != 'doctor':
+        return redirect(url_for('dashboard'))
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    # No user_id filter — doctor can view any report
+    cur.execute("SELECT * FROM medical_reports WHERE id=%s", (report_id,))
+    report = cur.fetchone()
+    cur.close(); conn.close()
+    if not report:
+        abort(404)
+    mime_map = {'pdf': 'application/pdf', 'png': 'image/png',
+                'jpg': 'image/jpeg', 'jpeg': 'image/jpeg'}
+    mime = mime_map.get(report['file_type'], 'application/octet-stream')
+    return send_file(
+        io.BytesIO(bytes(report['file_data'])),
+        mimetype=mime,
+        download_name=report['original_name']
+    )
+
 @app.route('/reports/delete/<int:report_id>', methods=['POST'])
 @login_required
 def delete_report(report_id):
